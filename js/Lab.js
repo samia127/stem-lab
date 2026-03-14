@@ -53,12 +53,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Apply saved language
   applyLang(currentLang, false);
+  
+  // Initialize welcome message and quick prompts
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
+  if (t.welcomeMsg) {
+    const welcomeMsg = document.getElementById('welcomeMsg');
+    if (welcomeMsg) welcomeMsg.innerHTML = t.welcomeMsg;
+  }
+  if (t.welcomeStep) {
+    const welcomeStep = document.getElementById('welcomeStep');
+    if (welcomeStep) welcomeStep.textContent = t.welcomeStep;
+  }
+  if (t.quickPrompts && Array.isArray(t.quickPrompts)) {
+    const qp = document.getElementById('quickPrompts');
+    if (qp) {
+      qp.innerHTML = t.quickPrompts.map(p =>
+        `<button class="quick-btn" onclick="quickAsk('${p.q.replace(/'/g, "\\'")}')">${p.label}</button>`
+      ).join('');
+    }
+  }
 
   // Greet user
   if (session) {
-    const t = T[currentLang];
-    document.getElementById('userGreeting').innerHTML =
-      `${t.greeting}<strong>${session.name}</strong>`;
+    const translations = window.translations || T;
+    const t = translations[currentLang] || translations.ar;
+    const userGreeting = document.getElementById('userGreeting');
+    if (userGreeting) {
+      userGreeting.innerHTML = `${t.greeting || ''}<strong>${session.name}</strong>`;
+    }
 
     // Apply user's saved accessibility prefs from registration
     if (session.a11yPrefs) {
@@ -97,31 +120,70 @@ function setLang(lang) {
   localStorage.setItem('stemlab_lang', lang);
 }
 
+// Helper function to update grade badge dynamically
+function updateGradeBadge(lang) {
+  const badgeGrade = document.getElementById('badgeGrade');
+  if (!badgeGrade) return;
+  
+  const translations = window.translations || T;
+  const t = translations[lang] || translations.ar;
+  
+  // Get user's grade from session
+  const userGrade = session?.grade || '9';
+  const gradeNum = parseInt(userGrade) || 9;
+  
+  // Format grade display based on language
+  if (lang === 'ar') {
+    badgeGrade.textContent = `الصف ${gradeNum}`;
+  } else {
+    badgeGrade.textContent = `Grade ${gradeNum}`;
+  }
+}
+
 function applyLang(lang, announce) {
-  const t = T[lang];
+  // Use window.translations if available, fallback to T for backwards compatibility
+  const translations = window.translations || T;
+  const t = translations[lang] || translations.ar;
   const html = document.documentElement;
-  html.setAttribute('lang', t.lang);
-  html.setAttribute('dir', t.dir);
+  html.setAttribute('lang', t.lang || lang);
+  html.setAttribute('dir', t.dir || (lang === 'ar' ? 'rtl' : 'ltr'));
 
   // Toggle buttons
-  document.getElementById('btnAr').classList.toggle('active', lang === 'ar');
-  document.getElementById('btnAr').setAttribute('aria-pressed', lang === 'ar');
-  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
-  document.getElementById('btnEn').setAttribute('aria-pressed', lang === 'en');
+  const btnAr = document.getElementById('btnAr');
+  const btnEn = document.getElementById('btnEn');
+  if (btnAr && btnEn) {
+    btnAr.classList.toggle('active', lang === 'ar');
+    btnAr.setAttribute('aria-pressed', lang === 'ar');
+    btnEn.classList.toggle('active', lang === 'en');
+    btnEn.setAttribute('aria-pressed', lang === 'en');
+  }
 
   // Logo / badges
-  document.getElementById('logoText').innerHTML  = t.logoText;
-  document.getElementById('badgeGrade').textContent = t.grade;
-  document.getElementById('badgeCurr').textContent  = t.curr;
+  const logoText = document.getElementById('logoText');
+  if (logoText) logoText.innerHTML = t.logoText || t.appTitle || '';
+  
+  // Update grade badge dynamically from user session
+  updateGradeBadge(lang);
+  
+  const badgeCurr = document.getElementById('badgeCurr');
+  if (badgeCurr) badgeCurr.textContent = t.curriculumBadge || t.curr || '';
 
   // User greeting
   if (session) {
-    document.getElementById('userGreeting').innerHTML = `${t.greeting}<strong>${session.name}</strong>`;
+    const userGreeting = document.getElementById('userGreeting');
+    if (userGreeting) {
+      userGreeting.innerHTML = `${t.greeting || ''}<strong>${session.name}</strong>`;
+    }
   }
 
-  // Experiment buttons
+  // Experiment buttons - update via data-i18n if present, otherwise use experiments array
   document.querySelectorAll('.exp-btn').forEach((btn, i) => {
-    btn.textContent = t.experiments[i];
+    const i18nKey = btn.getAttribute('data-i18n');
+    if (i18nKey && t[i18nKey]) {
+      btn.textContent = t[i18nKey];
+    } else if (t.experiments && t.experiments[i]) {
+      btn.textContent = t.experiments[i];
+    }
   });
 
   // Stage / controls
@@ -135,39 +197,61 @@ function applyLang(lang, announce) {
   document.getElementById('obsTitle').textContent    = t.obsTitle;
   document.getElementById('burnerLabel').textContent = t.burnerLabel;
 
-  // Beaker labels
-  const cfg = t.expConfigs[state.experiment];
-  document.getElementById('labelA').innerHTML = `${cfg.a}<br>100 ${cfg.ml}`;
-  document.getElementById('labelB').innerHTML = `${cfg.b}<br>100 ${cfg.ml}`;
+  // Beaker labels - use expConfigs if available
+  if (t.expConfigs && t.expConfigs[state.experiment]) {
+    const cfg = t.expConfigs[state.experiment];
+    const labelA = document.getElementById('labelA');
+    const labelB = document.getElementById('labelB');
+    if (labelA) labelA.innerHTML = `${cfg.a}<br>100 ${cfg.ml}`;
+    if (labelB) labelB.innerHTML = `${cfg.b}<br>100 ${cfg.ml}`;
+  }
 
   // AI panel
-  document.getElementById('aiName').textContent        = t.aiName;
-  document.getElementById('aiDesc').textContent        = t.aiDesc;
-  document.getElementById('stepLabel').textContent     = t.stepLabel;
-  document.getElementById('welcomeStep').textContent   = t.welcomeStep;
-  document.getElementById('welcomeMsg').innerHTML      = t.welcomeMsg;
-  document.getElementById('chatInput').placeholder     = t.chatPlaceholder;
-  document.getElementById('chatInput').style.direction = t.dir;
-  document.getElementById('chatArea').style.direction  = t.dir;
-  document.getElementById('fabLabel').textContent      = t.fabLabel;
+  const aiName = document.getElementById('aiName');
+  const aiDesc = document.getElementById('aiDesc');
+  const stepLabel = document.getElementById('stepLabel');
+  const welcomeStep = document.getElementById('welcomeStep');
+  const welcomeMsg = document.getElementById('welcomeMsg');
+  const chatInput = document.getElementById('chatInput');
+  const chatArea = document.getElementById('chatArea');
+  const fabLabel = document.getElementById('fabLabel');
+  
+  if (aiName) aiName.textContent = t.aiName || '';
+  if (aiDesc) aiDesc.textContent = t.aiDesc || '';
+  if (stepLabel) stepLabel.textContent = t.stepLabel || '';
+  if (welcomeStep) welcomeStep.textContent = t.welcomeStep || '';
+  if (welcomeMsg) welcomeMsg.innerHTML = t.welcomeMsg || '';
+  if (chatInput) {
+    chatInput.placeholder = t.chatPlaceholder || '';
+    chatInput.style.direction = t.dir || (lang === 'ar' ? 'rtl' : 'ltr');
+  }
+  if (chatArea) chatArea.style.direction = t.dir || (lang === 'ar' ? 'rtl' : 'ltr');
+  if (fabLabel) fabLabel.textContent = t.fabLabel || '';
 
-  // Quick prompts
+  // Quick prompts - only update if quickPrompts array exists
   const qp = document.getElementById('quickPrompts');
-  qp.innerHTML = t.quickPrompts.map(p =>
-    `<button class="quick-btn" onclick="quickAsk('${p.q.replace(/'/g, "\\'")}')">${p.label}</button>`
-  ).join('');
+  if (qp && t.quickPrompts && Array.isArray(t.quickPrompts)) {
+    qp.innerHTML = t.quickPrompts.map(p =>
+      `<button class="quick-btn" onclick="quickAsk('${p.q.replace(/'/g, "\\'")}')">${p.label}</button>`
+    ).join('');
+  }
 
-  // Report modal
-  document.getElementById('modalTitle').textContent = t.modalTitle;
-  ['repSec0','repSec1','repSec2','repSec3','repSec4','repSec5'].forEach((id, i) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = t.repSec[i];
-  });
-  document.getElementById('repTitle').textContent     = t.repTitleVal;
-  document.getElementById('repGoal').textContent      = t.repGoalVal;
-  document.getElementById('repMaterials').textContent = t.repMatsVal;
-  document.getElementById('repSafety').textContent    = t.repSafetyVal;
-  document.getElementById('modalClose').textContent   = t.modalClose;
+  // Report modal - these are handled by data-i18n in HTML, but update if needed
+  const modalTitle = document.getElementById('reportModalTitle');
+  if (modalTitle && !modalTitle.getAttribute('data-i18n')) {
+    modalTitle.textContent = t.modalTitle || '';
+  }
+  const repTitle = document.getElementById('repTitle');
+  const repGoal = document.getElementById('repGoal');
+  const repMaterials = document.getElementById('repMaterials');
+  const repSafety = document.getElementById('repSafety');
+  const modalClose = document.getElementById('reportClose');
+  
+  if (repTitle && !repTitle.getAttribute('data-i18n')) repTitle.textContent = t.repTitleVal || '';
+  if (repGoal && !repGoal.getAttribute('data-i18n')) repGoal.textContent = t.repGoalVal || '';
+  if (repMaterials && !repMaterials.getAttribute('data-i18n')) repMaterials.textContent = t.repMatsVal || '';
+  if (repSafety && !repSafety.getAttribute('data-i18n')) repSafety.textContent = t.repSafetyVal || '';
+  if (modalClose && !modalClose.getAttribute('data-i18n')) modalClose.textContent = t.modalClose || '';
 
   if (announce) {
     addMsg('ai', t.switchedMsg);
@@ -180,7 +264,8 @@ function applyLang(lang, announce) {
    6. CHATBOT SHOW / HIDE
 ══════════════════════════════════════════ */
 function toggleChatPanel() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   chatVisible = !chatVisible;
   const appEl  = document.querySelector('.app');
   const panel  = document.getElementById('aiPanelRegion');
@@ -208,7 +293,8 @@ function toggleChatPanel() {
    7. CLAUDE AI
 ══════════════════════════════════════════ */
 async function askClaude(userMsg) {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   showTyping();
   try {
     const response = await fetch(CLAUDE_API, {
@@ -292,7 +378,8 @@ function advanceStep() {
 function toggleTTS() {
   ttsEnabled = !ttsEnabled;
   updateTTSBtn();
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   showNotification(ttsEnabled ? t.notifTTSOn : t.notifTTSOff);
   if (!ttsEnabled) window.speechSynthesis?.cancel();
 }
@@ -325,7 +412,8 @@ function speakText(text) {
    9. VOICE INPUT — MICROPHONE (Accessibility)
 ══════════════════════════════════════════ */
 function startVoiceInput() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     showNotification(t.voiceNotSupported);
@@ -396,14 +484,16 @@ function toggleHighContrast() {
 function toggleLargeFont() {
   const on = document.body.classList.toggle('large-font');
   localStorage.setItem('stemlab_largefont', on);
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   showNotification(on ? t.notifLFOn : t.notifLFOff);
 }
 
 function toggleReduceMotion() {
   const on = document.body.classList.toggle('reduce-motion');
   localStorage.setItem('stemlab_reducemotion', on);
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   showNotification(on ? t.notifRMOn : t.notifRMOff);
 }
 
@@ -411,7 +501,8 @@ function toggleReduceMotion() {
    11. LAB ACTIONS
 ══════════════════════════════════════════ */
 function startReaction() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   if (state.reactionDone) { showNotification(t.notifResetFirst); return; }
   state.reactionDone = true;
   document.getElementById('stageLabel').textContent = t.stageRunning;
@@ -435,7 +526,8 @@ function startReaction() {
 }
 
 function toggleBurner() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   state.burnerOn = !state.burnerOn;
   document.getElementById('flame').classList.toggle('active', state.burnerOn);
   if (state.burnerOn) {
@@ -478,7 +570,8 @@ function setConcentration(val) {
 }
 
 function testTubeClick(i) {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   const colors = ['rgba(255,100,100,0.8)','rgba(255,165,0,0.8)','rgba(100,255,150,0.8)','rgba(100,150,255,0.8)'];
   document.getElementById(`tube${i}`).style.background = colors[i];
   const obs = `${t.tubePrefix} ${i+1}: ${t.tubeLabels[i]}`;
@@ -488,7 +581,8 @@ function testTubeClick(i) {
 }
 
 function selectExp(btn, exp) {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   document.querySelectorAll('.exp-btn').forEach((b, i) => {
     b.classList.toggle('active', b === btn);
     b.setAttribute('aria-selected', b === btn);
@@ -516,7 +610,8 @@ function selectExp(btn, exp) {
 }
 
 function resetLab(silent = false) {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   state.reactionDone  = false;
   state.burnerOn      = false;
   state.temperature   = 25;
@@ -537,7 +632,8 @@ function resetLab(silent = false) {
 }
 
 function generateReport() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   const obsText = state.observations.length > 0
     ? state.observations.map(o => `• [${o.time}] ${o.text}`).join('\n')
     : t.repNoObs;
@@ -573,7 +669,8 @@ function showNotification(msg) {
 }
 
 function logout() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   if (confirm(t.logoutConfirm)) {
     sessionStorage.removeItem('stemlab_user');
     window.location.href = 'auth.html';
@@ -598,6 +695,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const un = document.getElementById('userName');
     if (av) av.textContent = session.name ? session.name.charAt(0).toUpperCase() : '?';
     if (un) un.textContent = session.name || '';
+    
+    // Update grade badge on load
+    updateGradeBadge(currentLang);
   }
 
   // Restore chat visibility preference
@@ -606,16 +706,132 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Update toggle chat button text
   updateToggleChatBtn();
+  
+  // Apply language on load
+  const savedLang = localStorage.getItem('stemlab_lang') || 'ar';
+  if (savedLang !== currentLang) {
+    currentLang = savedLang;
+    applyLang(savedLang, false);
+  }
 });
 
 function updateToggleChatBtn() {
-  const t = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   const btn = document.getElementById('headerToggleChat');
   const lbl = document.getElementById('toggleChatLabel');
   const fab = document.getElementById('openChatFab');
   if (btn) btn.setAttribute('aria-expanded', chatVisible ? 'true' : 'false');
-  if (lbl) lbl.textContent = chatVisible
-    ? (currentLang==='ar' ? '🤖 إخفاء المساعد' : '🤖 Hide Assistant')
-    : (currentLang==='ar' ? '🤖 إظهار المساعد' : '🤖 Show Assistant');
+  if (lbl) {
+    const labelKey = chatVisible ? 'chatToggleHide' : 'chatToggleShow';
+    lbl.textContent = t[labelKey] || (currentLang==='ar' ? '🤖 إخفاء المساعد' : '🤖 Hide Assistant');
+  }
   if (fab) fab.classList.toggle('visible', !chatVisible);
 }
+
+// ── PROFILE DROPDOWN & GRADE CHANGE ─────────────────────────────
+function toggleProfileDropdown() {
+  const dropdown = document.getElementById('profileDropdown');
+  if (!dropdown) return;
+  dropdown.hidden = !dropdown.hidden;
+  
+  // Close dropdown when clicking outside
+  if (!dropdown.hidden) {
+    setTimeout(() => {
+      document.addEventListener('click', function closeOnOutsideClick(e) {
+        if (!dropdown.contains(e.target) && e.target.id !== 'userAvatar') {
+          dropdown.hidden = true;
+          document.removeEventListener('click', closeOnOutsideClick);
+        }
+      });
+    }, 0);
+  }
+}
+
+function openChangeGradeModal() {
+  const modal = document.getElementById('changeGradeModal');
+  const gradeSelect = document.getElementById('gradeSelect');
+  if (!modal || !gradeSelect) return;
+  
+  // Set current grade in select
+  const currentGrade = session?.grade || '9';
+  gradeSelect.value = currentGrade;
+  
+  // Apply translations to modal
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
+  document.querySelectorAll('#changeGradeModal [data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) {
+      if (el.tagName === 'OPTION') {
+        el.textContent = t[key];
+      } else {
+        el.textContent = t[key];
+      }
+    }
+  });
+  
+  // Update grade select options
+  const gradeKeys = ['grade6', 'grade7', 'grade8', 'grade9', 'grade10', 'grade11', 'grade12'];
+  gradeSelect.querySelectorAll('option').forEach((opt, idx) => {
+    const key = gradeKeys[idx];
+    if (key && t[key]) opt.textContent = t[key];
+  });
+  
+  modal.classList.add('open');
+  gradeSelect.focus();
+  
+  // Close profile dropdown
+  const dropdown = document.getElementById('profileDropdown');
+  if (dropdown) dropdown.hidden = true;
+}
+
+function closeChangeGradeModal() {
+  const modal = document.getElementById('changeGradeModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function saveGradeChange() {
+  const gradeSelect = document.getElementById('gradeSelect');
+  if (!gradeSelect || !session) return;
+  
+  const newGrade = gradeSelect.value;
+  if (!newGrade) return;
+  
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
+  
+  try {
+    const res = await fetch('/api/user/grade', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ grade: newGrade, email: session.email }),
+    });
+    
+    const data = await res.json();
+    
+    if (!res.ok || !data.ok) {
+      showNotification(t.gradeChanged || 'Failed to update grade');
+      return;
+    }
+    
+    // Update session
+    session.grade = newGrade;
+    sessionStorage.setItem('stemlab_user', JSON.stringify(session));
+    
+    // Update grade badge immediately
+    updateGradeBadge(currentLang);
+    
+    // Show success message
+    showNotification(t.gradeChanged || 'Grade updated successfully');
+    
+    // Close modal
+    closeChangeGradeModal();
+  } catch (err) {
+    console.error(err);
+    showNotification(t.gradeChanged || 'Failed to update grade');
+  }
+}
+
+// Expose applyLang globally so i18n.js can call it
+window.applyLang = applyLang;

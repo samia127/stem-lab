@@ -230,6 +230,52 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// Update user grade (simple endpoint - in production would require auth middleware)
+app.patch('/api/user/grade', async (req, res) => {
+  try {
+    const { grade } = req.body || {};
+    const { email } = req.query || {};
+    
+    // In production, get email from JWT/session instead of query param
+    // For now, we'll accept email in body for simplicity
+    const userEmail = req.body.email || email;
+    if (!userEmail || !grade) {
+      return res.status(400).json({ ok: false, error: 'MISSING_FIELDS' });
+    }
+    
+    const normEmail = normaliseEmail(userEmail);
+    const user = users.get(normEmail);
+    if (!user) {
+      return res.status(404).json({ ok: false, error: 'USER_NOT_FOUND' });
+    }
+    
+    // Validate grade
+    const gradeNum = parseInt(grade);
+    if (isNaN(gradeNum) || gradeNum < 6 || gradeNum > 12) {
+      return res.status(400).json({ ok: false, error: 'INVALID_GRADE' });
+    }
+    
+    // Update grade
+    user.grade = String(gradeNum);
+    users.set(normEmail, user);
+    
+    return res.json({
+      ok: true,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        school: user.school,
+        grade: user.grade,
+        role: user.role,
+      },
+    });
+  } catch (err) {
+    console.error('update grade error', err);
+    return res.status(500).json({ ok: false, error: 'SERVER_ERROR' });
+  }
+});
+
 // Fallback: send auth.html as default entry if hitting "/"
 app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'Auth.html'));

@@ -38,16 +38,23 @@
     </div>
 
     <!-- Badges -->
-    <div class="badge badge-green" id="badgeGrade" aria-label="Grade level">الصف 9</div>
-    <div class="badge badge-blue" aria-hidden="true">🇴🇲 <span id="badgeCurr">منهج وزارة التربية</span></div>
+    <div class="badge badge-green" id="badgeGrade" aria-label="Grade level" data-i18n="gradeDisplay">Grade —</div>
+    <div class="badge badge-blue" aria-hidden="true">🇴🇲 <span id="badgeCurr" data-i18n="curriculumBadge">MOE Curriculum</span></div>
 
     <!-- User menu -->
     <div class="user-menu" role="navigation" aria-label="User menu">
-      <div class="user-avatar" id="userAvatar" aria-hidden="true">?</div>
+      <div class="user-avatar" id="userAvatar" aria-hidden="true" onclick="toggleProfileDropdown()" style="cursor:pointer;">?</div>
       <span class="user-name" id="userName" aria-label="Logged in user"></span>
+      
+      <!-- Profile dropdown -->
+      <div class="profile-dropdown" id="profileDropdown" hidden>
+        <button class="profile-dropdown-item" onclick="openChangeGradeModal()" data-i18n="changeGrade">Change Grade</button>
+        <button class="profile-dropdown-item" onclick="logout()" data-i18n="logout">Logout</button>
+      </div>
+      
       <button class="logout-btn" id="logoutBtn" onclick="logout()"
               aria-label="Logout">
-        <span id="logoutLabel">خروج</span>
+        <span id="logoutLabel" data-i18n="logout">Logout</span>
       </button>
     </div>
 
@@ -58,7 +65,7 @@
             aria-controls="aiPanelRegion"
             title="Toggle AI assistant"
             style="padding:8px 14px;font-size:12px;">
-      <span id="toggleChatLabel">🤖 إخفاء المساعد</span>
+      <span id="toggleChatLabel" data-i18n="chatToggleHide">Hide Assistant</span>
     </button>
   </div>
 </header>
@@ -75,19 +82,19 @@
         <button class="exp-btn active" role="listitem"
                 onclick="selectExp(this,'acid-base')"
                 aria-pressed="true"
-                id="exp0">⚗️ تفاعل حمض وقاعدة</button>
+                id="exp0" data-i18n="expAcidBase">⚗️ Acid-Base Reaction</button>
         <button class="exp-btn" role="listitem"
                 onclick="selectExp(this,'boiling')"
                 aria-pressed="false"
-                id="exp1">🌡️ تجربة الغليان</button>
+                id="exp1" data-i18n="expBoiling">🌡️ Boiling Experiment</button>
         <button class="exp-btn" role="listitem"
                 onclick="selectExp(this,'indicator')"
                 aria-pressed="false"
-                id="exp2">🌈 كاشف الـ pH</button>
+                id="exp2" data-i18n="expIndicator">🌈 pH Indicator</button>
         <button class="exp-btn" role="listitem"
                 onclick="selectExp(this,'electrolysis')"
                 aria-pressed="false"
-                id="exp3">⚡ تحليل كهربائي</button>
+                id="exp3" data-i18n="expElectrolysis">⚡ Electrolysis</button>
       </div>
     </nav>
 
@@ -95,7 +102,7 @@
     <div class="lab-stage" role="img" aria-label="Virtual laboratory bench">
       <div class="lab-stage-bg" aria-hidden="true"></div>
       <div class="reaction-flash" id="reactionFlash" aria-hidden="true"></div>
-      <div class="stage-label" id="stageLabel" aria-live="polite">الحالة: جاهز</div>
+      <div class="stage-label" id="stageLabel" aria-live="polite" data-i18n="stageReady">Status: Ready</div>
 
       <div class="equipment-container" aria-hidden="true">
         <!-- Thermometer -->
@@ -116,7 +123,7 @@
               </div>
             </div>
           </div>
-          <div class="beaker-label" id="labelA">حمض HCl<br>100 مل</div>
+          <div class="beaker-label" id="labelA" data-i18n="beakerA">HCl Acid<br>100 ml</div>
         </div>
         <!-- Beaker B -->
         <div class="beaker-wrap">
@@ -127,7 +134,7 @@
               </div>
             </div>
           </div>
-          <div class="beaker-label" id="labelB">قاعدة NaOH<br>100 مل</div>
+          <div class="beaker-label" id="labelB" data-i18n="beakerB">NaOH Base<br>100 ml</div>
         </div>
         <!-- Result beaker -->
         <div class="beaker-wrap">
@@ -138,7 +145,7 @@
               </div>
             </div>
           </div>
-          <div class="beaker-label">ناتج التفاعل<br><span id="resultLabel">—</span></div>
+          <div class="beaker-label" data-i18n="beakerResult">Reaction Result<br><span id="resultLabel">—</span></div>
         </div>
         <!-- Bunsen Burner -->
         <div class="bunsen-wrap">
@@ -147,7 +154,7 @@
           </div>
           <div class="burner-body"></div>
           <div class="burner-base"></div>
-          <div class="burner-label" id="burnerLabel">موقد بنزن</div>
+          <div class="burner-label" id="burnerLabel" data-i18n="burnerLabel">Bunsen Burner</div>
         </div>
       </div>
 
@@ -170,7 +177,7 @@
     <!-- Controls -->
     <div class="controls-panel" role="group" aria-label="Lab controls">
       <div class="control-group">
-        <label class="control-label" for="tempSlider" id="labelTemp">درجة الحرارة</label>
+        <label class="control-label" for="tempSlider" id="labelTemp" data-i18n="labelTemp">Temperature</label>
         <input type="range" class="control-slider" id="tempSlider"
                min="20" max="120" value="25"
                oninput="setTemperature(this.value)"
@@ -178,26 +185,26 @@
                aria-valuemin="20" aria-valuemax="120" aria-valuenow="25">
       </div>
       <div class="control-group">
-        <label class="control-label" for="concSlider" id="labelConc">تركيز المحلول</label>
+        <label class="control-label" for="concSlider" id="labelConc" data-i18n="labelConc">Concentration</label>
         <input type="range" class="control-slider" id="concSlider"
                min="10" max="100" value="50"
                oninput="setConcentration(this.value)"
                aria-labelledby="labelConc"
                aria-valuemin="10" aria-valuemax="100" aria-valuenow="50">
       </div>
-      <button class="action-btn btn-primary" id="btnReact"  onclick="startReaction()">⚗️ ابدأ التفاعل</button>
-      <button class="action-btn btn-warning" id="btnBurner" onclick="toggleBurner()">🔥 تشغيل الموقد</button>
-      <button class="action-btn btn-success" id="btnReport" onclick="generateReport()">📄 تقرير المختبر</button>
-      <button class="action-btn btn-danger"  id="btnReset"  onclick="resetLab()">↺ إعادة ضبط</button>
+      <button class="action-btn btn-primary" id="btnReact"  onclick="startReaction()" data-i18n="btnReact">⚗️ Start Reaction</button>
+      <button class="action-btn btn-warning" id="btnBurner" onclick="toggleBurner()" data-i18n="btnBurner">🔥 Toggle Burner</button>
+      <button class="action-btn btn-success" id="btnReport" onclick="generateReport()" data-i18n="btnReport">📄 Lab Report</button>
+      <button class="action-btn btn-danger"  id="btnReset"  onclick="resetLab()" data-i18n="btnReset">↺ Reset Lab</button>
     </div>
 
     <!-- Observations -->
     <section class="observations" aria-label="Observations log">
-      <div class="obs-title" id="obsTitle">📋 سجل الملاحظات</div>
+      <div class="obs-title" id="obsTitle" data-i18n="obsTitle">📋 Observations Log</div>
       <div class="obs-log" id="obsLog" role="log" aria-live="polite" aria-label="Lab observations">
         <div class="obs-entry">
           <span class="obs-time">00:00</span>
-          <span id="obsInitText">المختبر جاهز — الحمض والقاعدة في الكؤوس المنفصلة</span>
+          <span id="obsInitText" data-i18n="obsInit">Lab ready — acid and base in separate beakers</span>
         </div>
       </div>
     </section>
@@ -215,8 +222,8 @@
         <div class="ai-status" title="Online"></div>
       </div>
       <div class="ai-info">
-        <div class="ai-name" id="aiName">مساعد العلوم الذكي</div>
-        <div class="ai-desc" id="aiDesc">دليلك الشخصي في المختبر الافتراضي</div>
+        <div class="ai-name" id="aiName" data-i18n="aiName">AI Science Assistant</div>
+        <div class="ai-desc" id="aiDesc" data-i18n="aiDesc">Your personal virtual lab guide</div>
       </div>
       <!-- Close button inside panel -->
       <button class="toggle-chat-btn" onclick="toggleChat()"
@@ -226,7 +233,7 @@
 
     <div class="steps-indicator" aria-label="Experiment progress" role="progressbar"
          aria-valuemin="1" aria-valuemax="5" aria-valuenow="2">
-      <span class="step-label" id="stepLabel">الخطوات:</span>
+      <span class="step-label" id="stepLabel" data-i18n="stepLabel">Steps:</span>
       <div class="step-dot done"    id="step1" aria-label="Step 1 complete"></div>
       <div class="step-dot current" id="step2" aria-label="Step 2 current"></div>
       <div class="step-dot"         id="step3" aria-label="Step 3"></div>
@@ -235,31 +242,25 @@
     </div>
 
     <div class="chat-area" id="chatArea" role="log" aria-live="polite" aria-label="Chat messages">
-      <div class="msg ai">
+      <div class="msg ai" id="welcomeMsgContainer">
         <div class="msg-avatar" aria-hidden="true">🤖</div>
         <div class="msg-bubble">
-          <div class="msg-step">الخطوة 1 من 5</div>
-          مرحباً! أنا مساعدك الذكي في مختبر الكيمياء. 🧪<br><br>
-          اليوم ستتعلم عن <strong>تفاعل التعادل</strong> بين حمض الهيدروكلوريك وهيدروكسيد الصوديوم.<br><br>
-          <strong>المعادلة الكيميائية:</strong><br>
-          HCl + NaOH → NaCl + H₂O<br><br>
-          هل أنت مستعد لبدء التجربة؟ 🚀
+          <div class="msg-step" id="welcomeStep" data-i18n="welcomeStep">Step 1 of 5</div>
+          <div id="welcomeMsg" data-i18n="welcomeMsg">Welcome message</div>
         </div>
       </div>
     </div>
 
     <div class="quick-prompts" id="quickPrompts" aria-label="Quick questions">
-      <button class="quick-btn" onclick="quickAsk('ما هو تفاعل التعادل؟')">ما هو التعادل؟</button>
-      <button class="quick-btn" onclick="quickAsk('ماذا يحدث عند خلط الحمض والقاعدة؟')">ماذا يحدث؟</button>
-      <button class="quick-btn" onclick="quickAsk('كيف أقيس الـ pH؟')">كيف أقيس pH؟</button>
-      <button class="quick-btn" onclick="quickAsk('ما هي تطبيقات تفاعل التعادل في الحياة؟')">تطبيقات عملية</button>
+      <!-- Quick prompts will be populated by JavaScript -->
     </div>
 
     <div class="chat-input-area">
       <button class="send-btn" onclick="sendMessage()"
               aria-label="Send message">➤</button>
       <textarea class="chat-input" id="chatInput"
-                placeholder="اسأل مساعدك... مثلاً: لماذا تغير اللون؟"
+                placeholder="Ask your assistant..."
+                data-i18n-placeholder="chatPlaceholder"
                 rows="1"
                 dir="rtl"
                 aria-label="Chat input"
@@ -285,21 +286,50 @@
      role="dialog" aria-modal="true" aria-labelledby="reportModalTitle"
      tabindex="-1">
   <div class="modal">
-    <h2 class="modal-title" id="reportModalTitle">📄 تقرير المختبر الافتراضي</h2>
-    <div class="report-section"><div class="report-section-title" id="repSec0">📌 عنوان التجربة</div><div class="report-text" id="repTitle">تفاعل التعادل بين HCl و NaOH</div></div>
-    <div class="report-section"><div class="report-section-title" id="repSec1">🎯 الهدف</div><div class="report-text" id="repGoal">دراسة تفاعل التعادل وملاحظة تغير الخصائص الكيميائية</div></div>
-    <div class="report-section"><div class="report-section-title" id="repSec2">🧪 المواد والأدوات</div><div class="report-text" id="repMaterials">HCl · NaOH · كؤوس زجاجية · موقد بنزن · ميزان حرارة · ورق تباين</div></div>
-    <div class="report-section"><div class="report-section-title" id="repSec3">📊 الملاحظات والنتائج</div><div class="report-text" id="repResults">في انتظار إجراء التجربة...</div></div>
-    <div class="report-section"><div class="report-section-title" id="repSec4">💡 الاستنتاج</div><div class="report-text" id="repConclusion">في انتظار إجراء التجربة...</div></div>
-    <div class="report-section"><div class="report-section-title" id="repSec5">⚠️ تدابير السلامة</div><div class="report-text" id="repSafety">ارتداء النظارات الواقية · استخدام القفازات · التهوية الجيدة</div></div>
+    <h2 class="modal-title" id="reportModalTitle" data-i18n="modalTitle">📄 Virtual Lab Report</h2>
+    <div class="report-section"><div class="report-section-title" id="repSec0" data-i18n="repSec0">📌 Experiment Title</div><div class="report-text" id="repTitle" data-i18n="repTitleVal">Neutralization Reaction</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec1" data-i18n="repSec1">🎯 Objective</div><div class="report-text" id="repGoal" data-i18n="repGoalVal">Study neutralization reaction</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec2" data-i18n="repSec2">🧪 Materials & Equipment</div><div class="report-text" id="repMaterials" data-i18n="repMatsVal">HCl · NaOH · Glass beakers</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec3" data-i18n="repSec3">📊 Observations & Results</div><div class="report-text" id="repResults">Waiting for experiment...</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec4" data-i18n="repSec4">💡 Conclusion</div><div class="report-text" id="repConclusion">Waiting for experiment...</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec5" data-i18n="repSec5">⚠️ Safety Measures</div><div class="report-text" id="repSafety" data-i18n="repSafetyVal">Safety goggles · Gloves</div></div>
     <button class="modal-close" id="reportClose"
             onclick="closeReport()"
-            aria-label="Close report">✅ إغلاق التقرير</button>
+            aria-label="Close report"
+            data-i18n="modalClose">✅ Close Report</button>
   </div>
 </div>
 
 <!-- Toast notification -->
 <div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<!-- ── CHANGE GRADE MODAL ── -->
+<div class="modal-overlay" id="changeGradeModal"
+     role="dialog" aria-modal="true" aria-labelledby="changeGradeModalTitle"
+     tabindex="-1">
+  <div class="modal">
+    <h2 class="modal-title" id="changeGradeModalTitle" data-i18n="changeGrade">Change Grade</h2>
+    <div class="auth-form">
+      <div class="form-group">
+        <label class="form-label" for="gradeSelect">
+          <span class="label-icon" aria-hidden="true">📚</span>
+          <span data-i18n="regGradeLabel">Grade</span>
+        </label>
+        <select class="role-select" id="gradeSelect" aria-required="true">
+          <option value="6" data-i18n="grade6">Grade 6</option>
+          <option value="7" data-i18n="grade7">Grade 7</option>
+          <option value="8" data-i18n="grade8">Grade 8</option>
+          <option value="9" data-i18n="grade9">Grade 9</option>
+          <option value="10" data-i18n="grade10">Grade 10</option>
+          <option value="11" data-i18n="grade11">Grade 11</option>
+          <option value="12" data-i18n="grade12">Grade 12</option>
+        </select>
+      </div>
+      <button type="button" class="auth-submit" onclick="saveGradeChange()" data-i18n="saveButton">Save</button>
+      <button type="button" class="auth-submit btn-secondary" onclick="closeChangeGradeModal()" data-i18n="cancelButton">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <script src="js/i18n.js"></script>
 <script src="js/lab.js"></script>
