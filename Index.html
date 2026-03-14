@@ -23,7 +23,7 @@
   <div class="logo">
     <div class="logo-icon" aria-hidden="true">🔬</div>
     <div>
-      <div class="logo-text" id="logoText">مختبر<span>عُمان</span> الافتراضي</div>
+      <div class="logo-text" id="logoText" data-i18n="appTitle">مختبر<span>عُمان</span> الافتراضي</div>
       <div class="logo-sub">OMAN VIRTUAL STEM LAB</div>
     </div>
   </div>
@@ -31,10 +31,10 @@
   <div class="header-right">
     <!-- Language toggle -->
     <div class="lang-toggle" role="group" aria-label="Language selection">
-      <button class="lang-btn active" id="btnAr" onclick="setLang('ar')"
-              aria-pressed="true" aria-label="Switch to Arabic">عربي</button>
-      <button class="lang-btn" id="btnEn" onclick="setLang('en')"
-              aria-pressed="false" aria-label="Switch to English">EN</button>
+      <button class="lang-btn active" id="btnAr" onclick="handleLanguageToggle('ar')"
+              aria-pressed="true"><span data-i18n="langArLabel">عربي</span></button>
+      <button class="lang-btn" id="btnEn" onclick="handleLanguageToggle('en')"
+              aria-pressed="false"><span data-i18n="langEnLabel">EN</span></button>
     </div>
 
     <!-- Badges -->

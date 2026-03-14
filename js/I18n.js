@@ -1,3 +1,206 @@
+// Simple client-side translation system shared across pages
+// --------------------------------------------------------
+// Usage:
+//   - Elements with data-i18n="key" will have their textContent/innerHTML
+//     updated based on translations[lang][key].
+//   - Call applyLanguage(lang) to switch, it will:
+//       * update document <html lang/dir>
+//       * update visible language toggle buttons if present
+//       * update document.title from translations[lang].appTitle or pageTitleAuth
+//   - Language preference is stored in localStorage under "stemlab_lang".
+
+window.translations = {
+  en: {
+    appTitle: 'STEM Labs Oman',
+    pageTitleAuth: 'Login | STEM Labs Oman',
+    pageTitleLab: 'Virtual STEM Lab — STEM Labs Oman',
+
+    // Auth / login
+    authLogo: 'STEM<span>Labs</span> Oman',
+    loginTab: 'Login',
+    registerTab: 'Register',
+    loginEmailLabel: 'Email Address',
+    loginPasswordLabel: 'Password',
+    loginButton: 'Log In',
+    noAccountText: "Don't have an account?",
+    goRegisterLink: 'Create free account',
+    haveAccountText: 'Already have an account?',
+    goLoginLink: 'Log in',
+
+    // Register form
+    regFullNameLabel: 'Full Name',
+    regEmailLabel: 'Email Address',
+    regSchoolLabel: 'School Name',
+    regGradeLabel: 'Grade',
+    regRoleLabel: 'Role',
+    regPasswordLabel: 'Password',
+    regConfirmPasswordLabel: 'Confirm Password',
+    regButton: 'Create Account',
+    roleStudent: 'Student',
+    roleTeacher: 'Teacher',
+    gradePlaceholder: 'Select grade',
+    grade6: 'Grade 6',
+    grade7: 'Grade 7',
+    grade8: 'Grade 8',
+    grade9: 'Grade 9',
+    grade10: 'Grade 10',
+    grade11: 'Grade 11',
+    grade12: 'Grade 12',
+    securityNote: 'Your password is hashed — it is never stored in plain text',
+
+    // OTP step
+    otpTitle: 'Check your email',
+    otpDescription: 'We sent a 6‑digit verification code to your email. Enter it below to activate your account.',
+    otpCodeLabel: 'Verification code',
+    otpPlaceholder: 'Enter 6‑digit code',
+    otpSubmitButton: 'Verify code',
+    otpResendPrefix: 'Didn’t get a code?',
+    otpResendButton: 'Resend code',
+    otpCountdown: 'You can request a new code in {seconds}s',
+
+    // Misc / language toggle
+    langArLabel: 'عربي',
+    langEnLabel: 'EN',
+  },
+
+  ar: {
+    appTitle: 'مختبرات ستيم عُمان',
+    pageTitleAuth: 'تسجيل الدخول | مختبرات ستيم عُمان',
+    pageTitleLab: 'المختبر الافتراضي | مختبرات ستيم عُمان',
+
+    // Auth / login
+    authLogo: 'مختبر<span>عُمان</span> الافتراضي',
+    loginTab: 'تسجيل الدخول',
+    registerTab: 'إنشاء حساب',
+    loginEmailLabel: 'البريد الإلكتروني',
+    loginPasswordLabel: 'كلمة المرور',
+    loginButton: 'تسجيل الدخول',
+    noAccountText: 'ليس لديك حساب؟',
+    goRegisterLink: 'إنشاء حساب مجاني',
+    haveAccountText: 'لديك حساب بالفعل؟',
+    goLoginLink: 'تسجيل الدخول',
+
+    // Register form
+    regFullNameLabel: 'الاسم الكامل',
+    regEmailLabel: 'البريد الإلكتروني',
+    regSchoolLabel: 'اسم المدرسة',
+    regGradeLabel: 'الصف الدراسي',
+    regRoleLabel: 'الدور',
+    regPasswordLabel: 'كلمة المرور',
+    regConfirmPasswordLabel: 'تأكيد كلمة المرور',
+    regButton: 'إنشاء الحساب',
+    roleStudent: 'طالب',
+    roleTeacher: 'معلم',
+    gradePlaceholder: 'اختر الصف',
+    grade6: 'الصف 6',
+    grade7: 'الصف 7',
+    grade8: 'الصف 8',
+    grade9: 'الصف 9',
+    grade10: 'الصف 10',
+    grade11: 'الصف 11',
+    grade12: 'الصف 12',
+    securityNote: 'كلمة مرورك مشفّرة — لا تُخزّن بصيغتها الأصلية أبداً',
+
+    // OTP step
+    otpTitle: 'تحقق من بريدك الإلكتروني',
+    otpDescription: 'أرسلنا رمز تحقق مكوّن من 6 أرقام إلى بريدك. أدخله أدناه لتفعيل حسابك.',
+    otpCodeLabel: 'رمز التحقق',
+    otpPlaceholder: 'أدخل الرمز المكوّن من 6 أرقام',
+    otpSubmitButton: 'تأكيد الرمز',
+    otpResendPrefix: 'لم يصلك الرمز؟',
+    otpResendButton: 'إعادة إرسال الرمز',
+    otpCountdown: 'يمكنك طلب رمز جديد بعد {seconds} ثانية',
+
+    // Misc / language toggle
+    langArLabel: 'عربي',
+    langEnLabel: 'EN',
+  },
+};
+
+const LANG_STORAGE_KEY = 'stemlab_lang';
+
+function getPreferredLanguage() {
+  const stored = localStorage.getItem(LANG_STORAGE_KEY);
+  if (stored === 'en' || stored === 'ar') return stored;
+  return 'ar';
+}
+
+function setPreferredLanguage(lang) {
+  localStorage.setItem(LANG_STORAGE_KEY, lang);
+}
+
+function applyLanguage(lang) {
+  const dict = window.translations[lang] || window.translations.ar;
+  const html = document.documentElement;
+  html.lang = lang;
+  html.dir = lang === 'ar' ? 'rtl' : 'ltr';
+
+  // Update language toggle buttons if present
+  const btnAr = document.getElementById('btnAr');
+  const btnEn = document.getElementById('btnEn');
+  if (btnAr && btnEn) {
+    btnAr.classList.toggle('active', lang === 'ar');
+    btnEn.classList.toggle('active', lang === 'en');
+    btnAr.setAttribute('aria-pressed', String(lang === 'ar'));
+    btnEn.setAttribute('aria-pressed', String(lang === 'en'));
+  }
+
+  // Update textual labels via data-i18n
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const value = dict[key];
+    if (!value) return;
+    // Allow HTML in some labels (like logo)
+    if (key === 'authLogo' || key === 'appTitle') {
+      el.innerHTML = value;
+    } else {
+      el.textContent = value;
+    }
+  });
+
+  // Update placeholders where we use data-i18n-placeholder
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    const value = dict[key];
+    if (value && 'placeholder' in el) {
+      el.placeholder = value;
+    }
+  });
+
+  // Update browser tab title – choose per-page key if available
+  const isAuthPage = !!document.getElementById('authPageRoot');
+  const pageTitleKey = isAuthPage ? 'pageTitleAuth' : 'pageTitleLab';
+  document.title = dict[pageTitleKey] || dict.appTitle;
+}
+
+// Helper to be used by buttons/sites: keeps storage + applies on both pages
+function handleLanguageToggle(lang) {
+  setPreferredLanguage(lang);
+  applyLanguage(lang);
+
+  // If lab.js is loaded, also notify its internal language system
+  if (typeof window.setLang === 'function') {
+    window.setLang(lang);
+  }
+}
+
+// Auto-apply on load
+document.addEventListener('DOMContentLoaded', () => {
+  const lang = getPreferredLanguage();
+  applyLanguage(lang);
+
+  // If lab.js has its own language state, sync it once on load
+  if (typeof window.setLang === 'function') {
+    window.setLang(lang);
+  }
+});
+
+// Expose helpers globally
+window.applyLanguage = applyLanguage;
+window.handleLanguageToggle = handleLanguageToggle;
+window.getPreferredLanguage = getPreferredLanguage;
+window.setPreferredLanguage = setPreferredLanguage;
+
 /**
  * i18n.js — Translation strings for Virtual STEM Lab
  * Must be loaded BEFORE lab.js
