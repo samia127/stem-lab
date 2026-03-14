@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="مختبر عُمان الافتراضي للعلوم — تجارب تفاعلية للصف التاسع | Oman Virtual STEM Lab">
+<title>المختبر الافتراضي | Virtual STEM Lab — Oman</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/Main.css">
+<link rel="stylesheet" href="css/Lab.css">
+</head>
+<body>
+
+<!-- Skip navigation -->
+<a href="#labMain" class="skip-link">تخطي إلى المختبر | Skip to lab</a>
+
+<!-- ARIA live region -->
+<div id="liveRegion" aria-live="polite" aria-atomic="true"
+     style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
+
+<!-- ── HEADER ── -->
+<header role="banner">
+  <div class="logo">
+    <div class="logo-icon" aria-hidden="true">🔬</div>
+    <div>
+      <div class="logo-text" id="logoText">مختبر<span>عُمان</span> الافتراضي</div>
+      <div class="logo-sub">OMAN VIRTUAL STEM LAB</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <!-- Language toggle -->
+    <div class="lang-toggle" role="group" aria-label="Language selection">
+      <button class="lang-btn active" id="btnAr" onclick="setLang('ar')"
+              aria-pressed="true" aria-label="Switch to Arabic">عربي</button>
+      <button class="lang-btn" id="btnEn" onclick="setLang('en')"
+              aria-pressed="false" aria-label="Switch to English">EN</button>
+    </div>
+
+    <!-- Badges -->
+    <div class="badge badge-green" id="badgeGrade" aria-label="Grade level">الصف 9</div>
+    <div class="badge badge-blue" aria-hidden="true">🇴🇲 <span id="badgeCurr">منهج وزارة التربية</span></div>
+
+    <!-- User menu -->
+    <div class="user-menu" role="navigation" aria-label="User menu">
+      <div class="user-avatar" id="userAvatar" aria-hidden="true">?</div>
+      <span class="user-name" id="userName" aria-label="Logged in user"></span>
+      <button class="logout-btn" id="logoutBtn" onclick="logout()"
+              aria-label="Logout">
+        <span id="logoutLabel">خروج</span>
+      </button>
+    </div>
+
+    <!-- Toggle chatbot button (header shortcut) -->
+    <button class="btn-secondary action-btn" id="headerToggleChat"
+            onclick="toggleChat()"
+            aria-expanded="true"
+            aria-controls="aiPanelRegion"
+            title="Toggle AI assistant"
+            style="padding:8px 14px;font-size:12px;">
+      <span id="toggleChatLabel">🤖 إخفاء المساعد</span>
+    </button>
+  </div>
+</header>
+
+<!-- ── MAIN APP GRID ── -->
+<div class="app" id="appGrid" role="main" id="labMain">
+
+  <!-- ── LAB AREA ── -->
+  <section class="lab-area" aria-label="Lab workspace" id="labMain">
+
+    <!-- Experiment selector -->
+    <nav aria-label="Experiment selection">
+      <div class="exp-selector" role="list">
+        <button class="exp-btn active" role="listitem"
+                onclick="selectExp(this,'acid-base')"
+                aria-pressed="true"
+                id="exp0">⚗️ تفاعل حمض وقاعدة</button>
+        <button class="exp-btn" role="listitem"
+                onclick="selectExp(this,'boiling')"
+                aria-pressed="false"
+                id="exp1">🌡️ تجربة الغليان</button>
+        <button class="exp-btn" role="listitem"
+                onclick="selectExp(this,'indicator')"
+                aria-pressed="false"
+                id="exp2">🌈 كاشف الـ pH</button>
+        <button class="exp-btn" role="listitem"
+                onclick="selectExp(this,'electrolysis')"
+                aria-pressed="false"
+                id="exp3">⚡ تحليل كهربائي</button>
+      </div>
+    </nav>
+
+    <!-- Lab stage -->
+    <div class="lab-stage" role="img" aria-label="Virtual laboratory bench">
+      <div class="lab-stage-bg" aria-hidden="true"></div>
+      <div class="reaction-flash" id="reactionFlash" aria-hidden="true"></div>
+      <div class="stage-label" id="stageLabel" aria-live="polite">الحالة: جاهز</div>
+
+      <div class="equipment-container" aria-hidden="true">
+        <!-- Thermometer -->
+        <div class="thermometer-wrap">
+          <div class="thermo-body"><div class="thermo-fill" id="thermoFill" style="height:20%"></div></div>
+          <div class="thermo-bulb"></div>
+          <div class="thermo-reading" id="thermoReading" aria-live="polite" aria-label="Temperature">25°C</div>
+        </div>
+        <!-- Beaker A -->
+        <div class="beaker-wrap">
+          <div class="beaker-svg-container">
+            <div class="beaker-spout"></div>
+            <div class="beaker-glass">
+              <div class="beaker-liquid" id="liquidA" style="height:50%;background:linear-gradient(180deg,rgba(255,107,107,0.4),rgba(255,59,107,0.8))">
+                <div class="liquid-surface" style="background:rgba(255,150,150,0.5)"></div>
+                <div class="bubble" style="width:5px;height:5px;background:rgba(255,200,200,0.6);left:20%;bottom:10%;animation-delay:0s;animation-duration:1.8s"></div>
+                <div class="bubble" style="width:3px;height:3px;background:rgba(255,200,200,0.6);left:60%;bottom:15%;animation-delay:0.5s;animation-duration:1.4s"></div>
+              </div>
+            </div>
+          </div>
+          <div class="beaker-label" id="labelA">حمض HCl<br>100 مل</div>
+        </div>
+        <!-- Beaker B -->
+        <div class="beaker-wrap">
+          <div class="beaker-svg-container">
+            <div class="beaker-glass">
+              <div class="beaker-liquid" id="liquidB" style="height:45%;background:linear-gradient(180deg,rgba(107,197,255,0.4),rgba(59,107,255,0.8))">
+                <div class="liquid-surface" style="background:rgba(150,200,255,0.5)"></div>
+              </div>
+            </div>
+          </div>
+          <div class="beaker-label" id="labelB">قاعدة NaOH<br>100 مل</div>
+        </div>
+        <!-- Result beaker -->
+        <div class="beaker-wrap">
+          <div class="beaker-svg-container">
+            <div class="beaker-glass">
+              <div class="beaker-liquid" id="liquidResult" style="height:0%;background:rgba(0,255,136,0.6)">
+                <div class="liquid-surface" style="background:rgba(0,255,136,0.3)"></div>
+              </div>
+            </div>
+          </div>
+          <div class="beaker-label">ناتج التفاعل<br><span id="resultLabel">—</span></div>
+        </div>
+        <!-- Bunsen Burner -->
+        <div class="bunsen-wrap">
+          <div class="flame-container">
+            <div class="flame" id="flame"><div class="flame-outer"></div><div class="flame-inner"></div></div>
+          </div>
+          <div class="burner-body"></div>
+          <div class="burner-base"></div>
+          <div class="burner-label" id="burnerLabel">موقد بنزن</div>
+        </div>
+      </div>
+
+      <!-- Test tube rack -->
+      <div style="position:absolute;bottom:90px;right:30px;" aria-hidden="true">
+        <div class="testtube-rack">
+          <div class="tubes-container">
+            <button class="test-tube" onclick="testTubeClick(0)" aria-label="Test tube 1 — pH 1"><div class="tube-liquid" id="tube0" style="height:40%;background:rgba(255,100,100,0.7)"></div></button>
+            <button class="test-tube" onclick="testTubeClick(1)" aria-label="Test tube 2 — pH 5"><div class="tube-liquid" id="tube1" style="height:55%;background:rgba(100,150,255,0.7)"></div></button>
+            <button class="test-tube" onclick="testTubeClick(2)" aria-label="Test tube 3 — pH 7"><div class="tube-liquid" id="tube2" style="height:35%;background:rgba(255,200,50,0.7)"></div></button>
+            <button class="test-tube" onclick="testTubeClick(3)" aria-label="Test tube 4 — pH 10"><div class="tube-liquid" id="tube3" style="height:60%;background:rgba(100,255,150,0.7)"></div></button>
+          </div>
+          <div class="rack-bar"><div class="rack-hole"></div><div class="rack-hole"></div><div class="rack-hole"></div><div class="rack-hole"></div></div>
+        </div>
+      </div>
+
+      <div class="lab-bench" aria-hidden="true"><div class="bench-surface"></div></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-panel" role="group" aria-label="Lab controls">
+      <div class="control-group">
+        <label class="control-label" for="tempSlider" id="labelTemp">درجة الحرارة</label>
+        <input type="range" class="control-slider" id="tempSlider"
+               min="20" max="120" value="25"
+               oninput="setTemperature(this.value)"
+               aria-labelledby="labelTemp"
+               aria-valuemin="20" aria-valuemax="120" aria-valuenow="25">
+      </div>
+      <div class="control-group">
+        <label class="control-label" for="concSlider" id="labelConc">تركيز المحلول</label>
+        <input type="range" class="control-slider" id="concSlider"
+               min="10" max="100" value="50"
+               oninput="setConcentration(this.value)"
+               aria-labelledby="labelConc"
+               aria-valuemin="10" aria-valuemax="100" aria-valuenow="50">
+      </div>
+      <button class="action-btn btn-primary" id="btnReact"  onclick="startReaction()">⚗️ ابدأ التفاعل</button>
+      <button class="action-btn btn-warning" id="btnBurner" onclick="toggleBurner()">🔥 تشغيل الموقد</button>
+      <button class="action-btn btn-success" id="btnReport" onclick="generateReport()">📄 تقرير المختبر</button>
+      <button class="action-btn btn-danger"  id="btnReset"  onclick="resetLab()">↺ إعادة ضبط</button>
+    </div>
+
+    <!-- Observations -->
+    <section class="observations" aria-label="Observations log">
+      <div class="obs-title" id="obsTitle">📋 سجل الملاحظات</div>
+      <div class="obs-log" id="obsLog" role="log" aria-live="polite" aria-label="Lab observations">
+        <div class="obs-entry">
+          <span class="obs-time">00:00</span>
+          <span id="obsInitText">المختبر جاهز — الحمض والقاعدة في الكؤوس المنفصلة</span>
+        </div>
+      </div>
+    </section>
+
+  </section>
+
+  <!-- ── AI PANEL ── -->
+  <aside id="aiPanelRegion" class="ai-panel"
+         aria-label="AI Science Assistant"
+         aria-hidden="false">
+
+    <div class="ai-header">
+      <div class="ai-avatar" aria-hidden="true">
+        🤖
+        <div class="ai-status" title="Online"></div>
+      </div>
+      <div class="ai-info">
+        <div class="ai-name" id="aiName">مساعد العلوم الذكي</div>
+        <div class="ai-desc" id="aiDesc">دليلك الشخصي في المختبر الافتراضي</div>
+      </div>
+      <!-- Close button inside panel -->
+      <button class="toggle-chat-btn" onclick="toggleChat()"
+              aria-label="Close AI assistant" title="Close chat"
+              id="closeChatBtn">✕</button>
+    </div>
+
+    <div class="steps-indicator" aria-label="Experiment progress" role="progressbar"
+         aria-valuemin="1" aria-valuemax="5" aria-valuenow="2">
+      <span class="step-label" id="stepLabel">الخطوات:</span>
+      <div class="step-dot done"    id="step1" aria-label="Step 1 complete"></div>
+      <div class="step-dot current" id="step2" aria-label="Step 2 current"></div>
+      <div class="step-dot"         id="step3" aria-label="Step 3"></div>
+      <div class="step-dot"         id="step4" aria-label="Step 4"></div>
+      <div class="step-dot"         id="step5" aria-label="Step 5"></div>
+    </div>
+
+    <div class="chat-area" id="chatArea" role="log" aria-live="polite" aria-label="Chat messages">
+      <div class="msg ai">
+        <div class="msg-avatar" aria-hidden="true">🤖</div>
+        <div class="msg-bubble">
+          <div class="msg-step">الخطوة 1 من 5</div>
+          مرحباً! أنا مساعدك الذكي في مختبر الكيمياء. 🧪<br><br>
+          اليوم ستتعلم عن <strong>تفاعل التعادل</strong> بين حمض الهيدروكلوريك وهيدروكسيد الصوديوم.<br><br>
+          <strong>المعادلة الكيميائية:</strong><br>
+          HCl + NaOH → NaCl + H₂O<br><br>
+          هل أنت مستعد لبدء التجربة؟ 🚀
+        </div>
+      </div>
+    </div>
+
+    <div class="quick-prompts" id="quickPrompts" aria-label="Quick questions">
+      <button class="quick-btn" onclick="quickAsk('ما هو تفاعل التعادل؟')">ما هو التعادل؟</button>
+      <button class="quick-btn" onclick="quickAsk('ماذا يحدث عند خلط الحمض والقاعدة؟')">ماذا يحدث؟</button>
+      <button class="quick-btn" onclick="quickAsk('كيف أقيس الـ pH؟')">كيف أقيس pH؟</button>
+      <button class="quick-btn" onclick="quickAsk('ما هي تطبيقات تفاعل التعادل في الحياة؟')">تطبيقات عملية</button>
+    </div>
+
+    <div class="chat-input-area">
+      <button class="send-btn" onclick="sendMessage()"
+              aria-label="Send message">➤</button>
+      <textarea class="chat-input" id="chatInput"
+                placeholder="اسأل مساعدك... مثلاً: لماذا تغير اللون؟"
+                rows="1"
+                dir="rtl"
+                aria-label="Chat input"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}">
+      </textarea>
+    </div>
+
+  </aside>
+
+</div><!-- /.app -->
+
+<!-- Floating FAB: re-opens chat when hidden -->
+<button class="open-chat-fab" id="openChatFab"
+        onclick="toggleChat()"
+        aria-label="Open AI assistant"
+        aria-expanded="false"
+        title="Open AI assistant">
+  🤖
+</button>
+
+<!-- ── LAB REPORT MODAL ── -->
+<div class="modal-overlay" id="reportModal"
+     role="dialog" aria-modal="true" aria-labelledby="reportModalTitle"
+     tabindex="-1">
+  <div class="modal">
+    <h2 class="modal-title" id="reportModalTitle">📄 تقرير المختبر الافتراضي</h2>
+    <div class="report-section"><div class="report-section-title" id="repSec0">📌 عنوان التجربة</div><div class="report-text" id="repTitle">تفاعل التعادل بين HCl و NaOH</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec1">🎯 الهدف</div><div class="report-text" id="repGoal">دراسة تفاعل التعادل وملاحظة تغير الخصائص الكيميائية</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec2">🧪 المواد والأدوات</div><div class="report-text" id="repMaterials">HCl · NaOH · كؤوس زجاجية · موقد بنزن · ميزان حرارة · ورق تباين</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec3">📊 الملاحظات والنتائج</div><div class="report-text" id="repResults">في انتظار إجراء التجربة...</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec4">💡 الاستنتاج</div><div class="report-text" id="repConclusion">في انتظار إجراء التجربة...</div></div>
+    <div class="report-section"><div class="report-section-title" id="repSec5">⚠️ تدابير السلامة</div><div class="report-text" id="repSafety">ارتداء النظارات الواقية · استخدام القفازات · التهوية الجيدة</div></div>
+    <button class="modal-close" id="reportClose"
+            onclick="closeReport()"
+            aria-label="Close report">✅ إغلاق التقرير</button>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<script src="js/i18n.js"></script>
+<script src="js/lab.js"></script>
+</body>
+</html>

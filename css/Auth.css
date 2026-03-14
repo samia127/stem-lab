@@ -1,0 +1,225 @@
+/* ============================================================
+   OMAN VIRTUAL STEM LAB — auth.css
+   Login & Register page styles
+   ============================================================ */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.auth-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  animation: modalIn 0.4s ease;
+}
+
+.auth-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-logo .logo-icon {
+  width: 56px; height: 56px;
+  margin: 0 auto 12px;
+  font-size: 26px;
+}
+
+.auth-logo .logo-text { font-size: 22px; }
+.auth-logo .logo-sub  { font-size: 11px; margin-top: 4px; }
+
+/* Tabs: Login / Register */
+.auth-tabs {
+  display: flex;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.auth-tab {
+  flex: 1; padding: 10px;
+  border: none; border-radius: 9px;
+  background: transparent; color: var(--muted);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.2s;
+  min-height: 44px;
+}
+.auth-tab.active {
+  background: linear-gradient(135deg, var(--accent), #0099cc);
+  color: #000;
+  box-shadow: 0 2px 10px rgba(0,212,255,0.3);
+}
+.auth-tab:hover:not(.active) { color: var(--text); }
+
+/* Form */
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.form-label {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+
+.form-label .label-icon { font-size: 14px; }
+
+.form-input {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+  min-height: 48px;
+}
+.form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0,212,255,0.12);
+}
+.form-input::placeholder { color: var(--muted); }
+.form-input[aria-invalid="true"] { border-color: var(--red); }
+
+/* Password field wrapper */
+.input-wrapper { position: relative; }
+
+.toggle-password {
+  position: absolute;
+  top: 50%; right: 12px;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  font-size: 16px; padding: 4px;
+  min-width: 32px; min-height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 6px;
+  transition: color 0.2s;
+}
+.toggle-password:hover { color: var(--accent); }
+
+/* HTML dir=rtl — flip password toggle side */
+[dir="rtl"] .toggle-password { right: auto; left: 12px; }
+
+/* Field error message */
+.field-error {
+  font-size: 12px; color: var(--red);
+  display: none; align-items: center; gap: 4px;
+}
+.field-error.visible { display: flex; }
+
+/* Password strength bar */
+.strength-bar-wrap { margin-top: 6px; }
+.strength-bar-track {
+  height: 4px; background: var(--border);
+  border-radius: 2px; overflow: hidden;
+}
+.strength-bar-fill {
+  height: 100%; border-radius: 2px;
+  transition: width 0.4s ease, background 0.4s ease;
+  width: 0%;
+}
+.strength-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* Role select */
+.role-select {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 14px;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  min-height: 48px;
+  transition: border-color 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='%236b7fa3'%3E%3Cpath d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 14px center;
+}
+[dir="rtl"] .role-select { background-position: right 14px center; }
+.role-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,255,0.12); }
+
+/* Submit button */
+.auth-submit {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--accent), #0099cc);
+  border: none; border-radius: 12px;
+  color: #000; font-family: 'Tajawal', sans-serif;
+  font-size: 16px; font-weight: 900;
+  cursor: pointer; transition: all 0.2s;
+  margin-top: 4px; min-height: 52px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.auth-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,212,255,0.4); }
+.auth-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* Global form error */
+.auth-error {
+  background: rgba(255,59,107,0.1);
+  border: 1px solid rgba(255,59,107,0.3);
+  border-radius: 10px; padding: 12px 14px;
+  color: var(--red); font-size: 13px;
+  display: none; align-items: center; gap: 8px;
+}
+.auth-error.visible { display: flex; }
+
+/* Divider */
+.auth-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 4px 0; color: var(--muted); font-size: 12px;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* Footer note */
+.auth-footer-note {
+  text-align: center; margin-top: 16px;
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+}
+
+/* Security note */
+.security-note {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--muted);
+  padding: 8px 12px;
+  background: rgba(0,255,136,0.04);
+  border: 1px solid rgba(0,255,136,0.1);
+  border-radius: 8px;
+}
+
+/* Loading spinner inside button */
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid rgba(0,0,0,0.2);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: none;
+}
+.spinner.visible { display: block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .auth-card { padding: 24px 20px; }
+}

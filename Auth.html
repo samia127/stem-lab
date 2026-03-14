@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="مختبر عُمان الافتراضي — تسجيل الدخول | Virtual STEM Lab Oman — Login">
+<title>تسجيل الدخول | Virtual STEM Lab — Oman</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/Main.css">
+<link rel="stylesheet" href="css/Auth.css">
+</head>
+<body>
+
+<!-- Skip link for keyboard/screen-reader users -->
+<a href="#mainContent" class="skip-link">تخطي إلى المحتوى الرئيسي | Skip to main content</a>
+
+<!-- ARIA live region for announcements -->
+<div id="liveRegion" aria-live="polite" aria-atomic="true"
+     style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">
+</div>
+
+<!-- Language toggle in top-right corner -->
+<div style="position:fixed;top:16px;right:16px;z-index:50;" role="group" aria-label="Language selection">
+  <div class="lang-toggle">
+    <button class="lang-btn active" id="btnAr" onclick="setAuthLang('ar')"
+            aria-pressed="true" aria-label="Switch to Arabic">عربي</button>
+    <button class="lang-btn" id="btnEn" onclick="setAuthLang('en')"
+            aria-pressed="false" aria-label="Switch to English">EN</button>
+  </div>
+</div>
+
+<main id="mainContent" class="auth-page">
+  <div class="auth-card" role="main">
+
+    <!-- Logo -->
+    <div class="auth-logo" aria-hidden="true">
+      <div class="logo-icon">🔬</div>
+      <div class="logo-text" id="authLogoText">مختبر<span>عُمان</span> الافتراضي</div>
+      <div class="logo-sub">OMAN VIRTUAL STEM LAB</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs" role="tablist" aria-label="Login or Register">
+      <button class="auth-tab active" id="tabLogin"
+              role="tab" aria-selected="true" aria-controls="formLogin">
+        <span id="tabLoginLabel">تسجيل الدخول</span>
+      </button>
+      <button class="auth-tab" id="tabRegister"
+              role="tab" aria-selected="false" aria-controls="formRegister">
+        <span id="tabRegisterLabel">إنشاء حساب</span>
+      </button>
+    </div>
+
+    <!-- ── LOGIN FORM ── -->
+    <form id="formLogin" role="tabpanel" aria-labelledby="tabLogin" novalidate>
+
+      <div class="auth-error" role="alert" aria-live="assertive"></div>
+
+      <div class="auth-form">
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">
+            <span class="label-icon" aria-hidden="true">📧</span>
+            <span id="labelLoginEmail">البريد الإلكتروني</span>
+          </label>
+          <input class="form-input" type="email" id="loginEmail"
+                 name="email" autocomplete="email"
+                 placeholder="example@school.om"
+                 aria-required="true" required>
+          <div class="field-error" id="loginEmailError" role="alert"></div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">
+            <span class="label-icon" aria-hidden="true">🔒</span>
+            <span id="labelLoginPassword">كلمة المرور</span>
+          </label>
+          <div class="input-wrapper">
+            <input class="form-input" type="password" id="loginPassword"
+                   name="password" autocomplete="current-password"
+                   placeholder="••••••••"
+                   aria-required="true" required>
+            <button type="button" class="toggle-password"
+                    data-target="loginPassword"
+                    aria-label="إظهار كلمة المرور">👁</button>
+          </div>
+          <div class="field-error" id="loginPasswordError" role="alert"></div>
+        </div>
+
+        <button type="submit" class="auth-submit">
+          <div class="spinner" aria-hidden="true"></div>
+          <span id="btnLoginLabel">تسجيل الدخول</span>
+        </button>
+
+      </div>
+
+      <div class="auth-footer-note">
+        <span id="noAccountText">ليس لديك حساب؟</span>
+        <button type="button" onclick="document.getElementById('tabRegister').click()"
+                style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:inherit;font-weight:700;padding:0 4px;"
+                id="goRegisterLink">إنشاء حساب مجاني</button>
+      </div>
+
+    </form>
+
+    <!-- ── REGISTER FORM ── -->
+    <form id="formRegister" role="tabpanel" aria-labelledby="tabRegister" hidden novalidate>
+
+      <div class="auth-error" role="alert" aria-live="assertive"></div>
+
+      <div class="auth-form">
+
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label" for="regName">
+            <span class="label-icon" aria-hidden="true">👤</span>
+            <span id="labelRegName">الاسم الكامل</span>
+          </label>
+          <input class="form-input" type="text" id="regName"
+                 name="name" autocomplete="name"
+                 placeholder="محمد الحارثي"
+                 aria-required="true" required>
+          <div class="field-error" id="regNameError" role="alert"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="regEmail">
+            <span class="label-icon" aria-hidden="true">📧</span>
+            <span id="labelRegEmail">البريد الإلكتروني</span>
+          </label>
+          <input class="form-input" type="email" id="regEmail"
+                 name="email" autocomplete="email"
+                 placeholder="student@school.om"
+                 aria-required="true" required>
+          <div class="field-error" id="regEmailError" role="alert"></div>
+        </div>
+
+        <!-- Role -->
+        <div class="form-group">
+          <label class="form-label" for="regRole">
+            <span class="label-icon" aria-hidden="true">🎓</span>
+            <span id="labelRegRole">الدور</span>
+          </label>
+          <select class="role-select" id="regRole" name="role" aria-required="true">
+            <option value="student" id="optStudent">طالب</option>
+            <option value="teacher" id="optTeacher">معلم</option>
+            <option value="admin"   id="optAdmin">مشرف</option>
+          </select>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="regPassword">
+            <span class="label-icon" aria-hidden="true">🔒</span>
+            <span id="labelRegPassword">كلمة المرور</span>
+          </label>
+          <div class="input-wrapper">
+            <input class="form-input" type="password" id="regPassword"
+                   name="password" autocomplete="new-password"
+                   placeholder="••••••••"
+                   aria-required="true"
+                   aria-describedby="strengthLabel" required>
+            <button type="button" class="toggle-password"
+                    data-target="regPassword"
+                    aria-label="إظهار كلمة المرور">👁</button>
+          </div>
+          <div class="strength-bar-wrap" aria-hidden="true">
+            <div class="strength-bar-track">
+              <div class="strength-bar-fill" id="strengthFill"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel" aria-live="polite"></div>
+          </div>
+          <div class="field-error" id="regPasswordError" role="alert"></div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label class="form-label" for="regConfirmPassword">
+            <span class="label-icon" aria-hidden="true">🔐</span>
+            <span id="labelRegConfirm">تأكيد كلمة المرور</span>
+          </label>
+          <div class="input-wrapper">
+            <input class="form-input" type="password" id="regConfirmPassword"
+                   name="confirmPassword" autocomplete="new-password"
+                   placeholder="••••••••"
+                   aria-required="true" required>
+            <button type="button" class="toggle-password"
+                    data-target="regConfirmPassword"
+                    aria-label="إظهار كلمة المرور">👁</button>
+          </div>
+          <div class="field-error" id="regConfirmPasswordError" role="alert"></div>
+        </div>
+
+        <!-- Security note -->
+        <div class="security-note" role="note">
+          <span aria-hidden="true">🔐</span>
+          <span id="securityNote">كلمة مرورك مشفّرة — لا تُخزّن بصيغتها الأصلية أبداً</span>
+        </div>
+
+        <button type="submit" class="auth-submit">
+          <div class="spinner" aria-hidden="true"></div>
+          <span id="btnRegisterLabel">إنشاء الحساب</span>
+        </button>
+
+      </div>
+
+      <div class="auth-footer-note">
+        <span id="haveAccountText">لديك حساب بالفعل؟</span>
+        <button type="button" onclick="document.getElementById('tabLogin').click()"
+                style="background:none;border:none;color:var(--accent);cursor:pointer;font-family:inherit;font-size:inherit;font-weight:700;padding:0 4px;"
+                id="goLoginLink">تسجيل الدخول</button>
+      </div>
+
+    </form>
+
+  </div>
+</main>
+
+<script src="js/auth.js" type="module" defer></script>
+<script>
+// ── Auth page language toggle (inline — small enough to stay here) ──
+const authT = {
+  ar: {
+    logoText:        'مختبر<span style="color:var(--accent)">عُمان</span> الافتراضي',
+    tabLogin:        'تسجيل الدخول', tabRegister: 'إنشاء حساب',
+    labelLoginEmail: 'البريد الإلكتروني', labelLoginPassword: 'كلمة المرور',
+    labelRegName:    'الاسم الكامل',   labelRegEmail: 'البريد الإلكتروني',
+    labelRegRole:    'الدور',          labelRegPassword: 'كلمة المرور', labelRegConfirm: 'تأكيد كلمة المرور',
+    btnLogin:        'تسجيل الدخول',   btnRegister: 'إنشاء الحساب',
+    optStudent:      'طالب', optTeacher:'معلم', optAdmin:'مشرف',
+    securityNote:    'كلمة مرورك مشفّرة — لا تُخزّن بصيغتها الأصلية أبداً',
+    noAccount:       'ليس لديك حساب؟', goRegister: 'إنشاء حساب مجاني',
+    haveAccount:     'لديك حساب بالفعل؟', goLogin: 'تسجيل الدخول',
+    skipLink:        'تخطي إلى المحتوى الرئيسي',
+  },
+  en: {
+    logoText:        'Virtual<span style="color:var(--accent)">Oman</span> STEM Lab',
+    tabLogin:        'Login',          tabRegister: 'Register',
+    labelLoginEmail: 'Email Address',  labelLoginPassword: 'Password',
+    labelRegName:    'Full Name',      labelRegEmail: 'Email Address',
+    labelRegRole:    'Role',           labelRegPassword: 'Password', labelRegConfirm: 'Confirm Password',
+    btnLogin:        'Log In',         btnRegister: 'Create Account',
+    optStudent:      'Student', optTeacher:'Teacher', optAdmin:'Admin',
+    securityNote:    'Your password is hashed — it is never stored in plain text',
+    noAccount:       "Don't have an account?", goRegister: 'Create free account',
+    haveAccount:     'Already have an account?', goLogin: 'Log in',
+    skipLink:        'Skip to main content',
+  }
+};
+
+function setAuthLang(lang) {
+  const t = authT[lang];
+  const html = document.documentElement;
+  html.setAttribute('lang', lang);
+  html.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+  document.getElementById('btnAr').classList.toggle('active', lang==='ar');
+  document.getElementById('btnEn').classList.toggle('active', lang==='en');
+  document.getElementById('btnAr').setAttribute('aria-pressed', lang==='ar');
+  document.getElementById('btnEn').setAttribute('aria-pressed', lang==='en');
+
+  document.getElementById('authLogoText').innerHTML  = t.logoText;
+  document.getElementById('tabLoginLabel').textContent   = t.tabLogin;
+  document.getElementById('tabRegisterLabel').textContent= t.tabRegister;
+  document.getElementById('labelLoginEmail').textContent = t.labelLoginEmail;
+  document.getElementById('labelLoginPassword').textContent = t.labelLoginPassword;
+  document.getElementById('labelRegName').textContent    = t.labelRegName;
+  document.getElementById('labelRegEmail').textContent   = t.labelRegEmail;
+  document.getElementById('labelRegRole').textContent    = t.labelRegRole;
+  document.getElementById('labelRegPassword').textContent= t.labelRegPassword;
+  document.getElementById('labelRegConfirm').textContent = t.labelRegConfirm;
+  document.getElementById('btnLoginLabel').textContent   = t.btnLogin;
+  document.getElementById('btnRegisterLabel').textContent= t.btnRegister;
+  document.getElementById('optStudent').textContent      = t.optStudent;
+  document.getElementById('optTeacher').textContent      = t.optTeacher;
+  document.getElementById('optAdmin').textContent        = t.optAdmin;
+  document.getElementById('securityNote').textContent    = t.securityNote;
+  document.getElementById('noAccountText').textContent   = t.noAccount;
+  document.getElementById('goRegisterLink').textContent  = t.goRegister;
+  document.getElementById('haveAccountText').textContent = t.haveAccount;
+  document.getElementById('goLoginLink').textContent     = t.goLogin;
+  document.querySelector('.skip-link').textContent       = t.skipLink;
+
+  // Update placeholders
+  document.getElementById('loginEmail').placeholder    = lang==='en'?'example@school.om':'example@school.om';
+  document.getElementById('regName').placeholder       = lang==='en'?'Mohammed Al-Harthy':'محمد الحارثي';
+  document.getElementById('regEmail').placeholder      = lang==='en'?'student@school.om':'student@school.om';
+
+  // Update toggle-password aria-labels
+  document.querySelectorAll('.toggle-password').forEach(btn => {
+    btn.setAttribute('aria-label', lang==='en' ? 'Show password' : 'إظهار كلمة المرور');
+  });
+}
+</script>
+</body>
+</html>
