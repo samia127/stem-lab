@@ -10,7 +10,14 @@
 //   - Language preference is stored in localStorage under "stemlab_lang".
 
 window.translations = {
+
+  /* ── ENGLISH ─────────────────────────────────────────── */
   en: {
+    // HTML attributes
+    dir: 'ltr',
+    lang: 'en',
+
+    // Page titles
     appTitle: 'STEM Labs Oman',
     pageTitleAuth: 'Login | STEM Labs Oman',
     pageTitleLab: 'Virtual STEM Lab — STEM Labs Oman',
@@ -54,34 +61,35 @@ window.translations = {
     otpCodeLabel: 'Verification code',
     otpPlaceholder: 'Enter 6‑digit code',
     otpSubmitButton: 'Verify code',
-    otpResendPrefix: 'Didn't get a code?',
+    otpResendPrefix: "Didn't get a code?",
     otpResendButton: 'Resend code',
     otpCountdown: 'You can request a new code in {seconds}s',
 
-    // Misc / language toggle
+    // Language toggle
     langArLabel: 'عربي',
     langEnLabel: 'EN',
-    
-    // Logout
+
+    // Logout / profile
     logout: 'Logout',
-    
-    // Profile dropdown
     changeGrade: 'Change Grade',
     gradeChanged: 'Grade updated successfully',
     saveButton: 'Save',
     cancelButton: 'Cancel',
     gradeDisplay: 'Grade —',
     curriculumBadge: 'MOE Curriculum',
-    
-    // Lab page translations (from Lab.js T object)
-    dir: 'ltr',
-    lang: 'en',
+
+    // ── Lab page ──────────────────────────────────────────
+    grade: 'Grade 9',
+    curr: 'MOE Curriculum',
+    logoText: 'STEM<span style="color:var(--accent)">Labs</span> Oman',
     greeting: 'Hello, ',
+
     experiments: ['⚗️ Acid-Base Reaction','🌡️ Boiling Experiment','🌈 pH Indicator','⚡ Electrolysis'],
     expAcidBase: '⚗️ Acid-Base Reaction',
     expBoiling: '🌡️ Boiling Experiment',
     expIndicator: '🌈 pH Indicator',
     expElectrolysis: '⚡ Electrolysis',
+
     stageReady: 'Status: Ready',
     stageRunning: '⚗️ Reaction in progress...',
     stageDone: '✅ Reaction Complete',
@@ -94,15 +102,25 @@ window.translations = {
     obsTitle: '📋 Observations Log',
     obsInit: 'Lab ready — acid and base in separate beakers',
     burnerLabel: 'Bunsen Burner',
+
     aiName: 'AI Science Assistant',
     aiDesc: 'Your personal virtual lab guide',
     stepLabel: 'Steps:',
     welcomeStep: 'Step 1 of 5',
     welcomeMsg: "Hello! I'm your AI Chemistry Lab assistant. 🧪<br><br>Today you'll learn about <strong>neutralization reactions</strong> between hydrochloric acid and sodium hydroxide.<br><br><strong>Chemical Equation:</strong><br>HCl + NaOH → NaCl + H₂O<br><br>Ready to start? 🚀",
     chatPlaceholder: 'Ask your assistant... e.g. Why did the color change?',
+
+    quickPrompts: [
+      { label: 'What is neutralization?', q: 'What is a neutralization reaction?' },
+      { label: 'What happens when mixed?', q: 'What happens when acid and base are mixed?' },
+      { label: 'How to measure pH?',       q: 'How do I measure pH?' },
+      { label: 'Real-world uses',          q: 'What are real-world applications of neutralization reactions?' }
+    ],
+
     chatToggleHide: 'Hide Assistant',
     chatToggleShow: 'Show Assistant',
     fabLabel: 'Assistant',
+
     modalTitle: '📄 Virtual Lab Report',
     repSec0: '📌 Experiment Title',
     repSec1: '🎯 Objective',
@@ -110,6 +128,7 @@ window.translations = {
     repSec3: '📊 Observations & Results',
     repSec4: '💡 Conclusion',
     repSec5: '⚠️ Safety Measures',
+    repSec: ['📌 Experiment Title','🎯 Objective','🧪 Materials & Equipment','📊 Observations & Results','💡 Conclusion','⚠️ Safety Measures'],
     repTitleVal: 'Neutralization Reaction between HCl and NaOH',
     repGoalVal: 'Study the neutralization reaction and observe changes in chemical properties',
     repMatsVal: 'Hydrochloric acid (HCl) · Sodium hydroxide (NaOH) · Glass beakers · Bunsen burner · Thermometer · Indicator paper',
@@ -117,6 +136,7 @@ window.translations = {
     repNoObs: 'No observations recorded — please perform the experiment first',
     repConclusionVal: 'The neutralization reaction between HCl and NaOH was confirmed. Products: NaCl + H₂O. Exothermic reaction.',
     modalClose: '✅ Close Report',
+
     notifReactDone: '⚗️ Reaction completed!',
     notifReset: '↺ Lab reset',
     notifBurnerOn: '🔥 Burner is on',
@@ -132,31 +152,39 @@ window.translations = {
     notifLFOff: '🔡 Large font off',
     notifRMOn: '🎞️ Reduce motion on',
     notifRMOff: '🎞️ Normal motion',
+
     obs1: 'Mixing started — immediate reaction observed',
     obs2: 'Color changed from red/blue to green — neutral solution',
     obs3: 'Temperature rose slightly — exothermic reaction confirmed',
     obsBurner: 'Bunsen burner on — heating solution',
     obsBoiling: 'Temperature reached 100°C — boiling started',
+
     reactionMsg: '<strong>Excellent! 🎉</strong> The color change confirms the reaction is complete!<br><br><strong>What happened?</strong><br>H⁺ ions from the acid combined with OH⁻ from the base to form water H₂O and salt NaCl.<br>The temperature rise confirms this is an <strong>exothermic</strong> reaction 🌡️',
+
     tubeLabels: ['Very Acidic - pH 1','Acidic - pH 5','Neutral - pH 7','Basic - pH 10'],
     tubePrefix: 'Tube',
     tubeAsk: 'Why is tube',
+
     beakerA: 'HCl Acid<br>100 ml',
     beakerB: 'NaOH Base<br>100 ml',
     beakerResult: 'Reaction Result',
+
     expConfigs: {
-      'acid-base': { a: 'HCl Acid', b: 'NaOH Base', ml: 'ml' },
-      'boiling': { a: 'Distilled Water', b: 'Salt Solution', ml: 'ml' },
-      'indicator': { a: 'Universal Indicator', b: 'Unknown Solution', ml: 'ml' },
-      'electrolysis': { a: 'Water + H₂SO₄', b: 'Positive Electrode', ml: 'ml' }
+      'acid-base':    { a: 'HCl Acid',           b: 'NaOH Base',          ml: 'ml' },
+      'boiling':      { a: 'Distilled Water',     b: 'Salt Solution',      ml: 'ml' },
+      'indicator':    { a: 'Universal Indicator', b: 'Unknown Solution',   ml: 'ml' },
+      'electrolysis': { a: 'Water + H₂SO₄',      b: 'Positive Electrode', ml: 'ml' }
     },
+
     expUserPrefix: 'I want to run the experiment:',
     expAskPrefix: 'Brief explanation of experiment',
     expAskSuffix: 'for Grade 9 students in Oman',
+
     aiSystemPrompt: `You are an AI science assistant for middle and high school students in Oman.
 Explain chemistry, physics, and biology in a simple, engaging way in English.
 You are speaking with Grade 9 students. Include chemical equations when relevant.
 Keep responses concise and friendly (3-5 sentences).`,
+
     aiError: 'Sorry, a connection error occurred. Please try again.',
     aiNoAnswer: "Sorry, I can't answer right now.",
     voiceListening: '🎤 Listening...',
@@ -168,7 +196,13 @@ Keep responses concise and friendly (3-5 sentences).`,
     logoutConfirm: 'Are you sure you want to logout?',
   },
 
+  /* ── ARABIC ──────────────────────────────────────────── */
   ar: {
+    // HTML attributes
+    dir: 'rtl',
+    lang: 'ar',
+
+    // Page titles
     appTitle: 'مختبرات ستيم عُمان',
     pageTitleAuth: 'تسجيل الدخول | مختبرات ستيم عُمان',
     pageTitleLab: 'المختبر الافتراضي | مختبرات ستيم عُمان',
@@ -216,30 +250,31 @@ Keep responses concise and friendly (3-5 sentences).`,
     otpResendButton: 'إعادة إرسال الرمز',
     otpCountdown: 'يمكنك طلب رمز جديد بعد {seconds} ثانية',
 
-    // Misc / language toggle
+    // Language toggle
     langArLabel: 'عربي',
     langEnLabel: 'EN',
-    
-    // Logout
+
+    // Logout / profile
     logout: 'تسجيل الخروج',
-    
-    // Profile dropdown
     changeGrade: 'تغيير الصف',
     gradeChanged: 'تم تحديث الصف بنجاح',
     saveButton: 'حفظ',
     cancelButton: 'إلغاء',
     gradeDisplay: 'الصف —',
     curriculumBadge: 'منهج وزارة التربية',
-    
-    // Lab page translations (from Lab.js T object)
-    dir: 'rtl',
-    lang: 'ar',
+
+    // ── Lab page ──────────────────────────────────────────
+    grade: 'الصف 9',
+    curr: 'منهج وزارة التربية',
+    logoText: 'مختبر<span style="color:var(--accent)">عُمان</span> الافتراضي',
     greeting: 'مرحباً، ',
+
     experiments: ['⚗️ تفاعل حمض وقاعدة','🌡️ تجربة الغليان','🌈 كاشف الـ pH','⚡ تحليل كهربائي'],
     expAcidBase: '⚗️ تفاعل حمض وقاعدة',
     expBoiling: '🌡️ تجربة الغليان',
     expIndicator: '🌈 كاشف الـ pH',
     expElectrolysis: '⚡ تحليل كهربائي',
+
     stageReady: 'الحالة: جاهز',
     stageRunning: '⚗️ التفاعل جارٍ...',
     stageDone: '✅ اكتمل التفاعل',
@@ -252,15 +287,25 @@ Keep responses concise and friendly (3-5 sentences).`,
     obsTitle: '📋 سجل الملاحظات',
     obsInit: 'المختبر جاهز — الحمض والقاعدة في الكؤوس المنفصلة',
     burnerLabel: 'موقد بنزن',
+
     aiName: 'مساعد العلوم الذكي',
     aiDesc: 'دليلك الشخصي في المختبر الافتراضي',
     stepLabel: 'الخطوات:',
     welcomeStep: 'الخطوة 1 من 5',
     welcomeMsg: 'مرحباً! أنا مساعدك الذكي في مختبر الكيمياء. 🧪<br><br>اليوم ستتعلم عن <strong>تفاعل التعادل</strong> بين حمض الهيدروكلوريك وهيدروكسيد الصوديوم.<br><br><strong>المعادلة الكيميائية:</strong><br>HCl + NaOH → NaCl + H₂O<br><br>هل أنت مستعد لبدء التجربة؟ 🚀',
     chatPlaceholder: 'اسأل مساعدك... مثلاً: لماذا تغير اللون؟',
+
+    quickPrompts: [
+      { label: 'ما هو التعادل؟',   q: 'ما هو تفاعل التعادل؟' },
+      { label: 'ماذا يحدث؟',       q: 'ماذا يحدث عند خلط الحمض والقاعدة؟' },
+      { label: 'كيف أقيس pH؟',    q: 'كيف أقيس الـ pH؟' },
+      { label: 'تطبيقات عملية',    q: 'ما هي تطبيقات تفاعل التعادل في الحياة؟' }
+    ],
+
     chatToggleHide: 'إخفاء المساعد',
     chatToggleShow: 'إظهار المساعد',
     fabLabel: 'المساعد',
+
     modalTitle: '📄 تقرير المختبر الافتراضي',
     repSec0: '📌 عنوان التجربة',
     repSec1: '🎯 الهدف',
@@ -268,6 +313,7 @@ Keep responses concise and friendly (3-5 sentences).`,
     repSec3: '📊 الملاحظات والنتائج',
     repSec4: '💡 الاستنتاج',
     repSec5: '⚠️ تدابير السلامة',
+    repSec: ['📌 عنوان التجربة','🎯 الهدف','🧪 المواد والأدوات','📊 الملاحظات والنتائج','💡 الاستنتاج','⚠️ تدابير السلامة'],
     repTitleVal: 'تفاعل التعادل بين حمض الهيدروكلوريك وهيدروكسيد الصوديوم',
     repGoalVal: 'دراسة تفاعل التعادل وملاحظة تغير الخصائص الكيميائية للمواد',
     repMatsVal: 'حمض الهيدروكلوريك (HCl) · هيدروكسيد الصوديوم (NaOH) · كؤوس زجاجية · موقد بنزن · ميزان حرارة · ورق تباين',
@@ -275,6 +321,7 @@ Keep responses concise and friendly (3-5 sentences).`,
     repNoObs: 'لم تُسجَّل ملاحظات — يرجى إجراء التجربة أولاً',
     repConclusionVal: 'تأكد تفاعل التعادل بين HCl و NaOH. المنتج: NaCl + H₂O. التفاعل طارد للحرارة.',
     modalClose: '✅ إغلاق التقرير',
+
     notifReactDone: '⚗️ التفاعل اكتمل بنجاح!',
     notifReset: '↺ تم إعادة ضبط المختبر',
     notifBurnerOn: '🔥 الموقد يعمل',
@@ -290,31 +337,39 @@ Keep responses concise and friendly (3-5 sentences).`,
     notifLFOff: '🔡 خط كبير معطّل',
     notifRMOn: '🎞️ تقليل الحركة',
     notifRMOff: '🎞️ حركة عادية',
+
     obs1: 'بدأ خلط الحمض والقاعدة — لوحظ تفاعل مباشر',
     obs2: 'تغير اللون من الأحمر/الأزرق إلى الأخضر — محلول متعادل',
     obs3: 'درجة الحرارة ارتفعت قليلاً — تفاعل طارد للحرارة',
     obsBurner: 'تشغيل موقد بنزن — بدء تسخين المحلول',
     obsBoiling: 'وصلت درجة الحرارة إلى 100°C — بدأ الغليان',
+
     reactionMsg: '<strong>رائع! 🎉</strong> لاحظت تغير اللون — هذا يؤكد اكتمال التفاعل!<br><br><strong>ما الذي حدث؟</strong><br>أيونات H⁺ من الحمض اتحدت مع OH⁻ من القاعدة لتكوين الماء H₂O والملح NaCl.<br>ارتفاع الحرارة يؤكد أن التفاعل <strong>طارد للحرارة</strong> 🌡️',
+
     tubeLabels: ['حمضي جداً - pH 1','حمضي - pH 5','متعادل - pH 7','قاعدي - pH 10'],
     tubePrefix: 'أنبوب',
     tubeAsk: 'لماذا لون الأنبوب',
+
     beakerA: 'حمض HCl<br>100 مل',
     beakerB: 'قاعدة NaOH<br>100 مل',
     beakerResult: 'ناتج التفاعل',
+
     expConfigs: {
-      'acid-base': { a: 'حمض HCl', b: 'قاعدة NaOH', ml: 'مل' },
-      'boiling': { a: 'ماء مقطر', b: 'محلول ملحي', ml: 'مل' },
-      'indicator': { a: 'كاشف عالمي', b: 'محلول مجهول', ml: 'مل' },
-      'electrolysis': { a: 'ماء + H₂SO₄', b: 'قطب موجب', ml: 'مل' }
+      'acid-base':    { a: 'حمض HCl',        b: 'قاعدة NaOH',      ml: 'مل' },
+      'boiling':      { a: 'ماء مقطر',        b: 'محلول ملحي',       ml: 'مل' },
+      'indicator':    { a: 'كاشف عالمي',      b: 'محلول مجهول',      ml: 'مل' },
+      'electrolysis': { a: 'ماء + H₂SO₄',    b: 'قطب موجب',         ml: 'مل' }
     },
+
     expUserPrefix: 'أريد إجراء تجربة:',
     expAskPrefix: 'شرح مختصر عن تجربة',
     expAskSuffix: 'للصف التاسع في سلطنة عمان',
+
     aiSystemPrompt: `أنت مساعد علوم ذكي لطلاب المرحلة الإعدادية والثانوية في سلطنة عُمان.
 تشرح الكيمياء والفيزياء والأحياء بطريقة بسيطة وممتعة باللغة العربية.
 تتحدث مع طلاب الصف التاسع. تُضمّن معادلات كيميائية عند الحاجة.
 ردودك قصيرة ومركزة (3-5 جمل) وودية.`,
+
     aiError: 'عذراً، حدث خطأ في الاتصال. تحقق من الإنترنت وأعد المحاولة.',
     aiNoAnswer: 'عذراً، لا يمكنني الإجابة الآن.',
     voiceListening: '🎤 جارٍ الاستماع...',
@@ -326,6 +381,9 @@ Keep responses concise and friendly (3-5 sentences).`,
     logoutConfirm: 'هل تريد تسجيل الخروج؟',
   },
 };
+
+// Also expose as T for any legacy references (safe alias, no duplication)
+window.T = window.translations;
 
 const LANG_STORAGE_KEY = 'stemlab_lang';
 
@@ -355,12 +413,12 @@ function applyLanguage(lang) {
     btnEn.setAttribute('aria-pressed', String(lang === 'en'));
   }
 
-  // Update textual labels via data-i18n
+  // Update all data-i18n elements
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     const value = dict[key];
-    if (!value) return;
-    // Allow HTML in some labels (like logo, beaker labels)
+    if (value === undefined || value === null) return;
+    // Use innerHTML for keys that contain HTML markup
     if (key === 'authLogo' || key === 'appTitle' || key.startsWith('beaker') || key.startsWith('exp')) {
       el.innerHTML = value;
     } else {
@@ -368,212 +426,36 @@ function applyLanguage(lang) {
     }
   });
 
-  // Update placeholders where we use data-i18n-placeholder
+  // Update placeholder attributes
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     const value = dict[key];
-    if (value && 'placeholder' in el) {
-      el.placeholder = value;
-    }
+    if (value && 'placeholder' in el) el.placeholder = value;
   });
 
-  // Update browser tab title – choose per-page key if available
+  // Update browser tab title
   const isAuthPage = !!document.getElementById('authPageRoot');
   const pageTitleKey = isAuthPage ? 'pageTitleAuth' : 'pageTitleLab';
   document.title = dict[pageTitleKey] || dict.appTitle;
-  
-  // If Lab.js is loaded, also call its applyLang function
+
+  // If Lab.js is loaded, call its applyLang function too
   if (typeof window.applyLang === 'function') {
     window.applyLang(lang, false);
   }
 }
 
-// Helper to be used by buttons/sites: keeps storage + applies on both pages
 function handleLanguageToggle(lang) {
   setPreferredLanguage(lang);
   applyLanguage(lang);
-
-  // If lab.js is loaded, also notify its internal language system
-  if (typeof window.setLang === 'function') {
-    window.setLang(lang);
-  }
 }
 
-// Auto-apply on load
+// Auto-apply on page load
 document.addEventListener('DOMContentLoaded', () => {
-  const lang = getPreferredLanguage();
-  applyLanguage(lang);
-
-  // If lab.js has its own language state, sync it once on load
-  if (typeof window.setLang === 'function') {
-    window.setLang(lang);
-  }
+  applyLanguage(getPreferredLanguage());
 });
 
-// Expose helpers globally
-window.applyLanguage = applyLanguage;
+// Expose globally
+window.applyLanguage       = applyLanguage;
 window.handleLanguageToggle = handleLanguageToggle;
 window.getPreferredLanguage = getPreferredLanguage;
 window.setPreferredLanguage = setPreferredLanguage;
-
-/**
- * i18n.js — Translation strings for Virtual STEM Lab
- * Must be loaded BEFORE lab.js
- */
-'use strict';
-
-const T = {
-  ar: {
-    dir: 'rtl', lang: 'ar',
-    grade: 'الصف 9', curr: 'منهج وزارة التربية',
-    logoText: 'مختبر<span style="color:var(--accent)">عُمان</span> الافتراضي',
-    greeting: 'مرحباً، ',
-    experiments: ['⚗️ تفاعل حمض وقاعدة','🌡️ تجربة الغليان','🌈 كاشف الـ pH','⚡ تحليل كهربائي'],
-    stageReady: 'الحالة: جاهز', stageRunning: '⚗️ التفاعل جارٍ...', stageDone: '✅ اكتمل التفاعل',
-    labelTemp: 'درجة الحرارة', labelConc: 'تركيز المحلول',
-    btnReact: '⚗️ ابدأ التفاعل', btnBurner: '🔥 تشغيل الموقد', btnReport: '📄 تقرير المختبر', btnReset: '↺ إعادة ضبط',
-    obsTitle: '📋 سجل الملاحظات',
-    obsInit: 'المختبر جاهز — الحمض والقاعدة في الكؤوس المنفصلة',
-    burnerLabel: 'موقد بنزن',
-    aiName: 'مساعد العلوم الذكي', aiDesc: 'دليلك الشخصي في المختبر الافتراضي',
-    stepLabel: 'الخطوات:',
-    welcomeStep: 'الخطوة 1 من 5',
-    welcomeMsg: 'مرحباً! أنا مساعدك الذكي في مختبر الكيمياء. 🧪<br><br>اليوم ستتعلم عن <strong>تفاعل التعادل</strong> بين حمض الهيدروكلوريك وهيدروكسيد الصوديوم.<br><br><strong>المعادلة الكيميائية:</strong><br>HCl + NaOH → NaCl + H₂O<br><br>هل أنت مستعد لبدء التجربة؟ 🚀',
-    chatPlaceholder: 'اسأل مساعدك... مثلاً: لماذا تغير اللون؟',
-    quickPrompts: [
-      { label: 'ما هو التعادل؟',   q: 'ما هو تفاعل التعادل؟' },
-      { label: 'ماذا يحدث؟',       q: 'ماذا يحدث عند خلط الحمض والقاعدة؟' },
-      { label: 'كيف أقيس pH؟',    q: 'كيف أقيس الـ pH؟' },
-      { label: 'تطبيقات عملية',    q: 'ما هي تطبيقات تفاعل التعادل في الحياة؟' }
-    ],
-    chatToggleHide: 'إخفاء المساعد', chatToggleShow: 'إظهار المساعد',
-    fabLabel: 'المساعد',
-    modalTitle: '📄 تقرير المختبر الافتراضي',
-    repSec: ['📌 عنوان التجربة','🎯 الهدف','🧪 المواد والأدوات','📊 الملاحظات والنتائج','💡 الاستنتاج','⚠️ تدابير السلامة'],
-    repTitleVal: 'تفاعل التعادل بين حمض الهيدروكلوريك وهيدروكسيد الصوديوم',
-    repGoalVal: 'دراسة تفاعل التعادل وملاحظة تغير الخصائص الكيميائية للمواد',
-    repMatsVal: 'حمض الهيدروكلوريك (HCl) · هيدروكسيد الصوديوم (NaOH) · كؤوس زجاجية · موقد بنزن · ميزان حرارة · ورق تباين',
-    repSafetyVal: 'ارتداء النظارات الواقية · القفازات · تهوية جيدة',
-    repNoObs: 'لم تُسجَّل ملاحظات — يرجى إجراء التجربة أولاً',
-    repConclusionVal: 'تأكد تفاعل التعادل بين HCl و NaOH. المنتج: NaCl + H₂O. التفاعل طارد للحرارة.',
-    modalClose: '✅ إغلاق التقرير',
-    notifReactDone: '⚗️ التفاعل اكتمل بنجاح!',
-    notifReset: '↺ تم إعادة ضبط المختبر',
-    notifBurnerOn: '🔥 الموقد يعمل',
-    notifBurnerOff: 'موقد بنزن مُطفأ',
-    notifResetFirst: 'أعد ضبط المختبر أولاً',
-    notifChatHidden: '💬 المساعد مخفي',
-    notifChatVisible: '💬 المساعد ظاهر',
-    notifTTSOn: '🔊 قراءة النص مفعّلة',
-    notifTTSOff: '🔊 قراءة النص معطّلة',
-    notifHCOn: '🌓 تباين عالٍ مفعّل', notifHCOff: '🌓 تباين عالٍ معطّل',
-    notifLFOn: '🔡 خط كبير مفعّل',   notifLFOff: '🔡 خط كبير معطّل',
-    notifRMOn: '🎞️ تقليل الحركة',   notifRMOff: '🎞️ حركة عادية',
-    obs1: 'بدأ خلط الحمض والقاعدة — لوحظ تفاعل مباشر',
-    obs2: 'تغير اللون من الأحمر/الأزرق إلى الأخضر — محلول متعادل',
-    obs3: 'درجة الحرارة ارتفعت قليلاً — تفاعل طارد للحرارة',
-    obsBurner: 'تشغيل موقد بنزن — بدء تسخين المحلول',
-    obsBoiling: 'وصلت درجة الحرارة إلى 100°C — بدأ الغليان',
-    reactionMsg: '<strong>رائع! 🎉</strong> لاحظت تغير اللون — هذا يؤكد اكتمال التفاعل!<br><br><strong>ما الذي حدث؟</strong><br>أيونات H⁺ من الحمض اتحدت مع OH⁻ من القاعدة لتكوين الماء H₂O والملح NaCl.<br>ارتفاع الحرارة يؤكد أن التفاعل <strong>طارد للحرارة</strong> 🌡️',
-    tubeLabels: ['حمضي جداً - pH 1','حمضي - pH 5','متعادل - pH 7','قاعدي - pH 10'],
-    tubePrefix: 'أنبوب', tubeAsk: 'لماذا لون الأنبوب',
-    expConfigs: {
-      'acid-base':    { a: 'حمض HCl', b: 'قاعدة NaOH', ml: 'مل' },
-      'boiling':      { a: 'ماء مقطر', b: 'محلول ملحي', ml: 'مل' },
-      'indicator':    { a: 'كاشف عالمي', b: 'محلول مجهول', ml: 'مل' },
-      'electrolysis': { a: 'ماء + H₂SO₄', b: 'قطب موجب', ml: 'مل' }
-    },
-    expUserPrefix: 'أريد إجراء تجربة:',
-    expAskPrefix: 'شرح مختصر عن تجربة', expAskSuffix: 'للصف التاسع في سلطنة عمان',
-    aiSystemPrompt: `أنت مساعد علوم ذكي لطلاب المرحلة الإعدادية والثانوية في سلطنة عُمان.
-تشرح الكيمياء والفيزياء والأحياء بطريقة بسيطة وممتعة باللغة العربية.
-تتحدث مع طلاب الصف التاسع. تُضمّن معادلات كيميائية عند الحاجة.
-ردودك قصيرة ومركزة (3-5 جمل) وودية.`,
-    aiError: 'عذراً، حدث خطأ في الاتصال. تحقق من الإنترنت وأعد المحاولة.',
-    aiNoAnswer: 'عذراً، لا يمكنني الإجابة الآن.',
-    voiceListening: '🎤 جارٍ الاستماع...',
-    voiceNotSupported: 'المتصفح لا يدعم الإدخال الصوتي',
-    ttsReading: 'جارٍ القراءة...',
-    ttsNotSupported: 'المتصفح لا يدعم قراءة النص',
-    langSwitched: '🌐 تم التبديل إلى العربية',
-    switchedMsg: '🌐 تم التبديل إلى العربية! كيف يمكنني مساعدتك؟',
-    logoutConfirm: 'هل تريد تسجيل الخروج؟',
-  },
-
-  en: {
-    dir: 'ltr', lang: 'en',
-    grade: 'Grade 9', curr: 'MOE Curriculum',
-    logoText: 'Virtual<span style="color:var(--accent)">Oman</span> STEM Lab',
-    greeting: 'Hello, ',
-    experiments: ['⚗️ Acid-Base Reaction','🌡️ Boiling Experiment','🌈 pH Indicator','⚡ Electrolysis'],
-    stageReady: 'Status: Ready', stageRunning: '⚗️ Reaction in progress...', stageDone: '✅ Reaction Complete',
-    labelTemp: 'Temperature', labelConc: 'Concentration',
-    btnReact: '⚗️ Start Reaction', btnBurner: '🔥 Toggle Burner', btnReport: '📄 Lab Report', btnReset: '↺ Reset Lab',
-    obsTitle: '📋 Observations Log',
-    obsInit: 'Lab ready — acid and base in separate beakers',
-    burnerLabel: 'Bunsen Burner',
-    aiName: 'AI Science Assistant', aiDesc: 'Your personal virtual lab guide',
-    stepLabel: 'Steps:',
-    welcomeStep: 'Step 1 of 5',
-    welcomeMsg: "Hello! I'm your AI Chemistry Lab assistant. 🧪<br><br>Today you'll learn about <strong>neutralization reactions</strong> between hydrochloric acid and sodium hydroxide.<br><br><strong>Chemical Equation:</strong><br>HCl + NaOH → NaCl + H₂O<br><br>Ready to start? 🚀",
-    chatPlaceholder: 'Ask your assistant... e.g. Why did the color change?',
-    quickPrompts: [
-      { label: 'What is neutralization?', q: 'What is a neutralization reaction?' },
-      { label: 'What happens when mixed?', q: 'What happens when acid and base are mixed?' },
-      { label: 'How to measure pH?',       q: 'How do I measure pH?' },
-      { label: 'Real-world uses',          q: 'What are real-world applications of neutralization reactions?' }
-    ],
-    chatToggleHide: 'Hide Assistant', chatToggleShow: 'Show Assistant',
-    fabLabel: 'Assistant',
-    modalTitle: '📄 Virtual Lab Report',
-    repSec: ['📌 Experiment Title','🎯 Objective','🧪 Materials & Equipment','📊 Observations & Results','💡 Conclusion','⚠️ Safety Measures'],
-    repTitleVal: 'Neutralization Reaction between HCl and NaOH',
-    repGoalVal: 'Study the neutralization reaction and observe changes in chemical properties',
-    repMatsVal: 'Hydrochloric acid (HCl) · Sodium hydroxide (NaOH) · Glass beakers · Bunsen burner · Thermometer · Indicator paper',
-    repSafetyVal: 'Safety goggles · Gloves · Well-ventilated area · Safe chemical disposal',
-    repNoObs: 'No observations recorded — please perform the experiment first',
-    repConclusionVal: 'The neutralization reaction between HCl and NaOH was confirmed. Products: NaCl + H₂O. Exothermic reaction.',
-    modalClose: '✅ Close Report',
-    notifReactDone: '⚗️ Reaction completed!',
-    notifReset: '↺ Lab reset',
-    notifBurnerOn: '🔥 Burner is on',
-    notifBurnerOff: 'Burner turned off',
-    notifResetFirst: 'Please reset the lab first',
-    notifChatHidden: '💬 Assistant hidden',
-    notifChatVisible: '💬 Assistant visible',
-    notifTTSOn: '🔊 Text-to-speech enabled',
-    notifTTSOff: '🔊 Text-to-speech disabled',
-    notifHCOn: '🌓 High contrast on',  notifHCOff: '🌓 High contrast off',
-    notifLFOn: '🔡 Large font on',     notifLFOff: '🔡 Large font off',
-    notifRMOn: '🎞️ Reduce motion on', notifRMOff: '🎞️ Normal motion',
-    obs1: 'Mixing started — immediate reaction observed',
-    obs2: 'Color changed from red/blue to green — neutral solution',
-    obs3: 'Temperature rose slightly — exothermic reaction confirmed',
-    obsBurner: 'Bunsen burner on — heating solution',
-    obsBoiling: 'Temperature reached 100°C — boiling started',
-    reactionMsg: '<strong>Excellent! 🎉</strong> The color change confirms the reaction is complete!<br><br><strong>What happened?</strong><br>H⁺ ions from the acid combined with OH⁻ from the base to form water H₂O and salt NaCl.<br>The temperature rise confirms this is an <strong>exothermic</strong> reaction 🌡️',
-    tubeLabels: ['Very Acidic - pH 1','Acidic - pH 5','Neutral - pH 7','Basic - pH 10'],
-    tubePrefix: 'Tube', tubeAsk: 'Why is tube',
-    expConfigs: {
-      'acid-base':    { a: 'HCl Acid',              b: 'NaOH Base',          ml: 'ml' },
-      'boiling':      { a: 'Distilled Water',        b: 'Salt Solution',      ml: 'ml' },
-      'indicator':    { a: 'Universal Indicator',    b: 'Unknown Solution',   ml: 'ml' },
-      'electrolysis': { a: 'Water + H₂SO₄',         b: 'Positive Electrode', ml: 'ml' }
-    },
-    expUserPrefix: 'I want to run the experiment:',
-    expAskPrefix: 'Brief explanation of experiment', expAskSuffix: 'for Grade 9 students in Oman',
-    aiSystemPrompt: `You are an AI science assistant for middle and high school students in Oman.
-Explain chemistry, physics, and biology in a simple, engaging way in English.
-You are speaking with Grade 9 students. Include chemical equations when relevant.
-Keep responses concise and friendly (3-5 sentences).`,
-    aiError: 'Sorry, a connection error occurred. Please try again.',
-    aiNoAnswer: "Sorry, I can't answer right now.",
-    voiceListening: '🎤 Listening...',
-    voiceNotSupported: 'Your browser does not support voice input',
-    ttsReading: 'Reading aloud...',
-    ttsNotSupported: 'Your browser does not support text-to-speech',
-    langSwitched: '🌐 Switched to English',
-    switchedMsg: '🌐 Switched to English! How can I help with your experiment?',
-    logoutConfirm: 'Are you sure you want to logout?',
-  }
-};

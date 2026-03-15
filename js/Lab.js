@@ -46,14 +46,42 @@ const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
    3. INIT
 ══════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
+  // Get saved language from localStorage (i18n.js will also do this, but we need to sync currentLang)
+  const savedLang = localStorage.getItem('stemlab_lang') || 'ar';
+  currentLang = savedLang;
+  
   // Restore accessibility prefs
   if (localStorage.getItem('stemlab_highcontrast') === 'true') applyA11y('highcontrast', true);
   if (localStorage.getItem('stemlab_largefont')    === 'true') applyA11y('largefont', true);
   if (localStorage.getItem('stemlab_reducemotion') === 'true') applyA11y('reducemotion', true);
 
-  // Apply saved language
-  applyLang(currentLang, false);
-  
+  // Populate header user info
+  if (session) {
+    const av = document.getElementById('userAvatar');
+    const un = document.getElementById('userName');
+    if (av) av.textContent = session.name ? session.name.charAt(0).toUpperCase() : '?';
+    if (un) un.textContent = session.name || '';
+    
+    // Update grade badge on load
+    updateGradeBadge(currentLang);
+    
+    // Greet user
+    const translations = window.translations || T;
+    const t = translations[currentLang] || translations.ar;
+    const userGreeting = document.getElementById('userGreeting');
+    if (userGreeting) {
+      userGreeting.innerHTML = `${t.greeting || ''}<strong>${session.name}</strong>`;
+    }
+
+    // Apply user's saved accessibility prefs from registration
+    if (session.a11yPrefs) {
+      if (session.a11yPrefs.includes('highcontrast')) applyA11y('highcontrast', true);
+      if (session.a11yPrefs.includes('largefont'))    applyA11y('largefont', true);
+      if (session.a11yPrefs.includes('reducemotion')) applyA11y('reducemotion', true);
+      if (session.a11yPrefs.includes('tts'))          { ttsEnabled = true; updateTTSBtn(); }
+    }
+  }
+
   // Initialize welcome message and quick prompts
   const translations = window.translations || T;
   const t = translations[currentLang] || translations.ar;
@@ -74,26 +102,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Greet user
-  if (session) {
-    const translations = window.translations || T;
-    const t = translations[currentLang] || translations.ar;
-    const userGreeting = document.getElementById('userGreeting');
-    if (userGreeting) {
-      userGreeting.innerHTML = `${t.greeting || ''}<strong>${session.name}</strong>`;
-    }
+  // Restore chat visibility preference
+  const savedChat = localStorage.getItem('stemlab_chat');
+  if (savedChat === 'hidden') { chatVisible = true; toggleChatPanel(); }
 
-    // Apply user's saved accessibility prefs from registration
-    if (session.a11yPrefs) {
-      if (session.a11yPrefs.includes('highcontrast')) applyA11y('highcontrast', true);
-      if (session.a11yPrefs.includes('largefont'))    applyA11y('largefont', true);
-      if (session.a11yPrefs.includes('reducemotion')) applyA11y('reducemotion', true);
-      if (session.a11yPrefs.includes('tts'))          { ttsEnabled = true; updateTTSBtn(); }
-    }
-  }
+  // Update toggle chat button text
+  updateToggleChatBtn();
 
   // Keyboard shortcuts
   document.addEventListener('keydown', handleKeyboard);
+  
+  // Note: applyLanguage() from i18n.js will be called on DOMContentLoaded and will handle
+  // the initial language application. We don't need to call applyLang here to avoid conflicts.
 });
 
 /* ══════════════════════════════════════════
@@ -116,8 +136,8 @@ function handleKeyboard(e) {
 ══════════════════════════════════════════ */
 function setLang(lang) {
   currentLang = lang;
-  applyLang(lang, true);
   localStorage.setItem('stemlab_lang', lang);
+  applyLang(lang, true);
 }
 
 // Helper function to update grade badge dynamically
@@ -141,6 +161,9 @@ function updateGradeBadge(lang) {
 }
 
 function applyLang(lang, announce) {
+  // Update currentLang to match the passed lang parameter
+  currentLang = lang;
+  
   // Use window.translations if available, fallback to T for backwards compatibility
   const translations = window.translations || T;
   const t = translations[lang] || translations.ar;
@@ -235,6 +258,19 @@ function applyLang(lang, announce) {
       `<button class="quick-btn" onclick="quickAsk('${p.q.replace(/'/g, "\\'")}')">${p.label}</button>`
     ).join('');
   }
+  
+  // Update welcome message and step
+  if (t.welcomeMsg) {
+    const welcomeMsg = document.getElementById('welcomeMsg');
+    if (welcomeMsg) welcomeMsg.innerHTML = t.welcomeMsg;
+  }
+  if (t.welcomeStep) {
+    const welcomeStep = document.getElementById('welcomeStep');
+    if (welcomeStep) welcomeStep.textContent = t.welcomeStep;
+  }
+  
+  // Update toggle chat button
+  updateToggleChatBtn();
 
   // Report modal - these are handled by data-i18n in HTML, but update if needed
   const modalTitle = document.getElementById('reportModalTitle');
@@ -394,7 +430,8 @@ function updateTTSBtn() {
 function speakText(text) {
   if (!ttsEnabled || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const t     = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   const utter = new SpeechSynthesisUtterance(text);
   utter.lang  = currentLang === 'ar' ? 'ar-SA' : 'en-US';
   utter.rate  = 0.9;
@@ -477,7 +514,8 @@ function toggleHighContrast() {
   const on = document.body.classList.toggle('high-contrast');
   localStorage.setItem('stemlab_highcontrast', on);
   const btn = document.getElementById('ttsBtn')?.parentElement?.querySelectorAll('.icon-btn')[1];
-  const t   = T[currentLang];
+  const translations = window.translations || T;
+  const t = translations[currentLang] || translations.ar;
   showNotification(on ? t.notifHCOn : t.notifHCOff);
 }
 
@@ -688,32 +726,7 @@ function closeReport() {
   document.getElementById('btnReport').focus();
 }
 
-// Populate header user info on load
-document.addEventListener('DOMContentLoaded', () => {
-  if (session) {
-    const av = document.getElementById('userAvatar');
-    const un = document.getElementById('userName');
-    if (av) av.textContent = session.name ? session.name.charAt(0).toUpperCase() : '?';
-    if (un) un.textContent = session.name || '';
-    
-    // Update grade badge on load
-    updateGradeBadge(currentLang);
-  }
-
-  // Restore chat visibility preference
-  const savedChat = localStorage.getItem('stemlab_chat');
-  if (savedChat === 'hidden') { chatVisible = true; toggleChatPanel(); }
-
-  // Update toggle chat button text
-  updateToggleChatBtn();
-  
-  // Apply language on load
-  const savedLang = localStorage.getItem('stemlab_lang') || 'ar';
-  if (savedLang !== currentLang) {
-    currentLang = savedLang;
-    applyLang(savedLang, false);
-  }
-});
+// Removed duplicate DOMContentLoaded listener - merged into the one above
 
 function updateToggleChatBtn() {
   const translations = window.translations || T;
