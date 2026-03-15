@@ -38,19 +38,13 @@
     </div>
 
     <!-- Badges -->
-    <div class="badge badge-green" id="badgeGrade" aria-label="Grade level" data-i18n="gradeDisplay">Grade —</div>
+    <div class="badge badge-green" id="badgeGrade" onclick="openChangeGradeModal()" aria-label="Grade level" title="change grade" data-i18n="gradeDisplay" style="cursor:pointer;border:none;font-family:inherit;font-size:inherit;font-weight:700;">Grade —</div>
     <div class="badge badge-blue" aria-hidden="true">🇴🇲 <span id="badgeCurr" data-i18n="curriculumBadge">MOE Curriculum</span></div>
 
     <!-- User menu -->
     <div class="user-menu" role="navigation" aria-label="User menu">
       <div class="user-avatar" id="userAvatar" aria-hidden="true" onclick="toggleProfileDropdown()" style="cursor:pointer;">?</div>
       <span class="user-name" id="userName" aria-label="Logged in user"></span>
-      
-      <!-- Profile dropdown -->
-      <div class="profile-dropdown" id="profileDropdown" hidden>
-        <button class="profile-dropdown-item" onclick="openChangeGradeModal()" data-i18n="changeGrade">Change Grade</button>
-        <button class="profile-dropdown-item" onclick="logout()" data-i18n="logout">Logout</button>
-      </div>
       
       <button class="logout-btn" id="logoutBtn" onclick="logout()"
               aria-label="Logout">

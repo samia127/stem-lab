@@ -1,40 +1,50 @@
-## STEM Labs Oman — Virtual STEM Lab Platform
+# STEM Labs Oman — Virtual STEM Lab Platform
 
 An accessible virtual science lab for Omani students in Grades 6–12, with interactive experiments, an Arabic-first AI assistant, and lab report generation.
 
-### Overview
+---
 
-STEM Labs Oman simulates a school science lab in the browser so that students can experiment safely even when their school has limited or no physical laboratories.  
-The platform is designed primarily for Omani students in Grades 6–12 and their teachers. It focuses on chemistry (with plans for physics and biology), using visual simulations, guided AI explanations in Arabic, and auto-generated lab reports to reinforce scientific thinking and documentation skills.
+## Overview
 
-### Key Features
+STEM Labs Oman simulates a school science lab in the browser so that students can experiment safely even when their school has limited or no physical laboratories.
 
-- **Virtual experiments**: Interactive simulations of core curriculum experiments (e.g. acid-base reactions, boiling, indicators, electrolysis).
-- **AI assistant in Arabic & English**: Context-aware chat assistant that explains concepts, answers questions, and guides students step-by-step.
-- **Lab report generator**: Compiles observations and experiment metadata into a structured lab report that students can review or export.
-- **Teacher / admin-ready authentication**: Email + password login with OTP email verification for secure account creation.
+The platform is designed primarily for Omani students in Grades 6–12 and their teachers. It focuses on chemistry (with plans for physics and biology), using visual simulations, guided AI explanations in Arabic and English, and auto-generated lab reports to reinforce scientific thinking and documentation skills.
+
+---
+
+## Key Features
+
+- **Virtual experiments**: Interactive simulations of core curriculum experiments (acid-base reactions, boiling, pH indicators, electrolysis).
+- **AI assistant in Arabic & English**: Context-aware chat assistant powered by Google Gemini (free tier) that explains concepts, answers questions, and guides students step-by-step.
+- **Lab report generator**: Compiles observations and experiment metadata into a structured lab report.
+- **Persistent user accounts**: Email + password login with OTP email verification. User accounts are saved to `users.json` on disk and survive server restarts.
 - **Accessibility features**: High-contrast mode, large fonts, reduced motion, TTS reading, and optional voice input.
 - **Language switcher**: Global English/Arabic toggle with RTL/LTR switching and persistent preference across pages.
 
-### Tech Stack
+---
 
-- **Frontend**: Vanilla HTML5, CSS3, and modern JavaScript (no framework) with responsive and accessible UI.
-- **3D / Simulation layer**: Current version uses rich 2D SVG/CSS-based lab visuals and animations, designed to be replaceable with Three.js / React Three Fiber scenes in future phases.
-- **Backend**: Node.js with Express (`server.js`), JSON APIs for auth and OTP flows.
-- **Database**: In-memory Maps for dev/demo (replaceable with PostgreSQL/MySQL later).
-- **AI**: Claude Messages API (Anthropic) via HTTPS from the browser (`lab.js`).
+## Tech Stack
+
+- **Frontend**: Vanilla HTML5, CSS3, and modern JavaScript (no framework).
+- **Backend**: Node.js with Express (`server.js`), JSON APIs for auth, OTP, and AI chat proxying.
+- **AI**: Google Gemini API (`gemini-1.5-flash`) via a secure backend proxy route — the API key never touches the browser.
+- **Database**: `users.json` file on disk for persistent user storage (replaceable with PostgreSQL/MySQL later). In-memory Map for pending OTP sessions.
 - **TTS / Speech**: Browser `speechSynthesis` (TTS) and Web Speech API for microphone input where supported.
-- **Email**: Nodemailer (SMTP), with console fallbacks when SMTP is not configured.
-- **Hosting**: Any Node-capable host (e.g. Vercel Node serverless, Omantel Cloud VM, Render, Heroku-style PaaS).
+- **Email**: Nodemailer (SMTP), with console fallback when SMTP is not configured.
+- **Hosting**: Any Node-capable host (Vercel, Omantel Cloud VM, Render, etc.).
 
-### Prerequisites
+---
 
-- **Node.js**: v18 or later recommended.
+## Prerequisites
+
+- **Node.js**: v18 or later (built-in `fetch` required — no extra packages needed for API calls).
 - **npm**: v8+.
-- **Email service**: SMTP credentials (e.g. from a transactional email provider) for sending OTP emails in production.
-- **Claude API access**: Anthropic API key if you want live AI responses (optional for local demo).
+- **Google AI Studio account**: Free Gemini API key from [aistudio.google.com](https://aistudio.google.com).
+- **Email service** *(optional)*: SMTP credentials for sending OTP emails in production. Without them, OTP codes are logged to the server console — fine for local dev.
 
-### Installation & Setup
+---
+
+## Installation & Setup
 
 1. **Clone the repository**
 
@@ -49,11 +59,15 @@ cd stemlab
 npm install
 ```
 
-3. **Create a `.env` file** in the project root and set required environment variables (see table below).
+3. **Create a `.env` file** in the project root:
 
 ```bash
-copy .env.example .env  # or create manually on Windows
+echo "node_modules/" > .gitignore
+echo ".env" >> .gitignore
+echo "users.json" >> .gitignore
 ```
+
+Then create `.env` with the following content (see table below).
 
 4. **Run the development server**
 
@@ -63,35 +77,48 @@ npm start
 
 5. **Open the app**
 
-- Auth / login page: `http://localhost:3000/Auth.html` (also served on `/`).
-- Lab page (requires login): `http://localhost:3000/Index.html`.
+- Login page: `http://localhost:3000/`
+- Lab page (requires login): `http://localhost:3000/Index.html`
 
-### Environment Variables
+---
 
-Create a `.env` file with values like the following:
+## Environment Variables
 
-| Variable        | Description                                                | Example                         |
-|----------------|------------------------------------------------------------|---------------------------------|
-| `PORT`         | HTTP port for the Node/Express server                     | `3000`                          |
-| `SMTP_HOST`    | SMTP host for sending OTP emails                          | `smtp.sendgrid.net`             |
-| `SMTP_PORT`    | SMTP port (usually 587 for TLS)                           | `587`                           |
-| `SMTP_SECURE`  | Use secure SMTP (true/false)                              | `false`                         |
-| `SMTP_USER`    | SMTP username / account                                   | `apikey` or full email address  |
-| `SMTP_PASS`    | SMTP password or API token                                | `xxxxxxx`                       |
-| `MAIL_FROM`    | From-address used in OTP emails                           | `no-reply@stemlabs.om`          |
-| `CLAUDE_API_KEY` | Anthropic API key (if routing AI calls via backend later)| `sk-ant-...`                    |
+Create a `.env` file in the project root:
 
-> Note: In the current version, client-side code calls the Claude Messages API directly using `CLAUDE_API` endpoint in `lab.js`. In production, move this call to a secured backend route that uses `CLAUDE_API_KEY`.
+| Variable         | Required | Description                                               | Example                        |
+|------------------|----------|-----------------------------------------------------------|--------------------------------|
+| `PORT`           | No       | HTTP port for the Express server (default: 3000)         | `3000`                         |
+| `GEMINI_API_KEY` | **Yes**  | Google Gemini API key for the AI assistant               | `AIzaSy...`                    |
+| `SMTP_HOST`      | No       | SMTP host for sending OTP emails                         | `smtp.sendgrid.net`            |
+| `SMTP_PORT`      | No       | SMTP port (usually 587 for TLS)                          | `587`                          |
+| `SMTP_SECURE`    | No       | Use secure SMTP (`true`/`false`)                         | `false`                        |
+| `SMTP_USER`      | No       | SMTP username                                            | `apikey`                       |
+| `SMTP_PASS`      | No       | SMTP password or API token                               | `xxxxxxx`                      |
+| `MAIL_FROM`      | No       | From-address used in OTP emails                          | `no-reply@stemlabs.om`         |
 
-### Project Structure
+**To get a free Gemini API key:**
+1. Go to [aistudio.google.com](https://aistudio.google.com)
+2. Sign in with any Google account
+3. Click **"Get API key"** → **"Create API key"**
+4. Copy the key and paste it into `.env` as `GEMINI_API_KEY=AIza...`
 
-```text
+> **Important:** Never commit `.env`, `users.json`, or `node_modules/` to git. The `.gitignore` setup above covers all three.
+
+---
+
+## Project Structure
+
+```
 stemlab/
   Auth.html        # Login / register page (with OTP flow)
   Index.html       # Main virtual lab interface (requires login)
-  server.js        # Node + Express backend for auth and OTP
+  server.js        # Node + Express backend (auth, OTP, AI proxy)
+  users.json       # Persisted user accounts (auto-created, gitignored)
   package.json     # Node project metadata and scripts
-  README.md        # High-level project overview and setup
+  .env             # Environment variables (gitignored)
+  .gitignore       # Excludes node_modules/, .env, users.json
+  README.md        # Project overview and setup
   DETAILS.md       # Deep-dive technical reference
   css/
     Main.css       # Shared styles, layout, variables, language toggle
@@ -100,64 +127,64 @@ stemlab/
   js/
     Auth.js        # Login + registration + OTP client logic
     Lab.js         # Lab simulation, AI assistant, TTS, state management
-    i18n.js        # Shared translation system + lab translation dictionary (T)
+    i18n.js        # Unified translation system (single window.translations object)
 ```
 
-### How to Use
+---
 
-1. **Register**  
-   Go to `Auth.html`, open the **Register** tab, and fill in: Full Name, Email, Password, Confirm Password, School Name, Grade (6–12), and Role (Student/Teacher).
-2. **Verify email**  
-   A 6-digit OTP is sent to your email (or logged in the server console for local/dev). Enter it on the verification screen and confirm.
-3. **Login**  
-   After verification, the UI switches back to Login. Enter your email and password to sign in.
-4. **Enter lab**  
-   You are redirected to `Index.html`, where you can choose an experiment, adjust controls (temperature, concentration), and run the simulation.
-5. **Interact and ask AI**  
-   Use the AI assistant panel to ask conceptual questions in Arabic or English. You can also enable TTS or voice input if your browser supports it.
-6. **Generate lab report**  
-   Click **Lab Report** to compile your observations into a structured report and review the generated summary.
+## How to Use
 
-### API Endpoints
+1. **Register** — go to the login page, open the **Register** tab, and fill in your details.
+2. **Verify email** — a 6-digit OTP is sent to your email (or logged to the server console in dev). Enter it to activate your account.
+3. **Login** — enter your email and password.
+4. **Enter lab** — choose an experiment, adjust temperature and concentration, and run the simulation.
+5. **Chat with AI** — ask questions in Arabic or English. The assistant is powered by Gemini and is aware of your current experiment state.
+6. **Change grade** — click the green **Grade** badge in the header to update your grade level.
+7. **Generate lab report** — click **Lab Report** to compile your observations into a structured report.
 
-All endpoints are served from the Node/Express server (`server.js`).
+---
 
-| Method | Path                  | Description                                                | Auth Required |
-|--------|-----------------------|------------------------------------------------------------|--------------|
-| POST   | `/api/auth/register`  | Create a pending user, hash password, send OTP email      | No           |
-| POST   | `/api/auth/verify-otp`| Verify 6-digit OTP, activate user, move to active store   | No           |
-| POST   | `/api/auth/resend-otp`| Resend a new OTP for a pending user (with countdown)      | No           |
-| POST   | `/api/auth/login`     | Login with email/password against active user store       | No (returns user, no JWT yet) |
-| GET    | `/*` static files     | Serve `Auth.html`, `Index.html`, CSS, JS assets           | —            |
+## API Endpoints
 
-> In production, you should secure `/Index.html` and lab APIs with session cookies or JWTs. Current version enforces login only in the frontend (`lab.js`) by checking `sessionStorage`.
+| Method  | Path                   | Description                                              |
+|---------|------------------------|----------------------------------------------------------|
+| POST    | `/api/auth/register`   | Create pending user, hash password, send OTP email      |
+| POST    | `/api/auth/verify-otp` | Verify 6-digit OTP, activate user, save to `users.json` |
+| POST    | `/api/auth/resend-otp` | Resend a new OTP for a pending user                     |
+| POST    | `/api/auth/login`      | Login with email/password                               |
+| PATCH   | `/api/user/grade`      | Update a user's grade, persisted to `users.json`        |
+| POST    | `/api/chat`            | Proxy AI chat messages to Google Gemini API             |
+| GET     | `/*`                   | Serve static HTML/CSS/JS files                          |
 
-### Known Issues & Limitations
+---
 
-- **In-memory storage only**: Users and pending OTPs are stored in server memory; they reset on restart and are not suitable for production.
-- **No JWT / session tokens yet**: Authentication is managed on the client with `sessionStorage`; there is no signed token or server-side session.
-- **AI calls from client**: Claude API is called from the browser, which is not safe for production API keys.
-- **Email deliverability**: If SMTP is not configured, OTP codes are only logged to the server console (fine for local testing).
-- **2D lab visuals**: Current experiments are 2D/animated rather than full 3D physics-based scenes.
+## Known Issues & Limitations
 
-### Future Roadmap
+- **No JWT / session tokens**: Authentication is managed client-side with `sessionStorage`. Fine for local/demo use; add JWT or signed cookies before any public deployment.
+- **Single-file user store**: `users.json` works well for dev and small deployments but is not suitable for concurrent high-traffic use. Replace with PostgreSQL/MySQL for production.
+- **OTP sessions are in-memory**: If the server restarts while a user is mid-registration, they will need to register again. Completed accounts in `users.json` are unaffected.
+- **2D lab visuals**: Current experiments are CSS/SVG-based rather than full 3D physics scenes.
+- **Chrome recommended**: The Web Speech API (voice input) has the best support in Chrome. Firefox works for all other features.
 
-- **Phase 2**
-  - Replace in-memory user storage with PostgreSQL or MySQL.
-  - Add proper JWT-based auth or secure sessions, with role-based access (Student/Teacher/Admin).
-  - Move Claude API calls to backend routes and secure with `CLAUDE_API_KEY`.
-  - Introduce teacher dashboard with real-time student session monitoring.
-  - Add export/download for lab reports (PDF/Docx).
+---
 
-- **Phase 3**
-  - Integrate a full 3D engine (Three.js or React Three Fiber) and physics (e.g. Rapier.js) for rich experiment scenes.
-  - Build a dedicated experiment authoring tool for teachers.
-  - Support more subjects (physics, biology) and additional languages.
-  - Deploy to Omantel Cloud with autoscaling and centralized logging.
+## Future Roadmap
 
-### License
+### Phase 2
+- Replace `users.json` with PostgreSQL or MySQL.
+- Add JWT-based authentication with role-based access (Student / Teacher / Admin).
+- Teacher dashboard with real-time student session monitoring.
+- Export lab reports as PDF or Word documents.
 
-Specify your preferred license here, for example:
+### Phase 3
+- Full 3D engine (Three.js / React Three Fiber) with physics simulation (Rapier.js).
+- Experiment authoring tool for teachers.
+- Support for physics and biology subjects.
+- Additional language support.
+- Deploy to Omantel Cloud with autoscaling.
 
-> MIT License — You are free to use, modify, and distribute this project with attribution.
+---
 
+## License
+
+MIT License — you are free to use, modify, and distribute this project with attribution.

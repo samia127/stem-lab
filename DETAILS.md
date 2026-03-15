@@ -1,10 +1,12 @@
-## STEM Labs Oman — Technical Details
+# STEM Labs Oman — Technical Details
 
 Deep-dive technical reference for the STEM Labs Oman virtual lab platform.
 
-### 1. System Architecture Diagram
+---
 
-```text
+## 1. System Architecture
+
+```
 ┌──────────────────────────────┐
 │          Browser             │
 │  (Auth.html / Index.html)    │
@@ -26,345 +28,273 @@ Deep-dive technical reference for the STEM Labs Oman virtual lab platform.
 │  - /api/auth/verify-otp      │
 │  - /api/auth/resend-otp      │
 │  - /api/auth/login           │
+│  - /api/user/grade           │
+│  - /api/chat  ← AI proxy     │
 │  - Serves HTML/CSS/JS files  │
 └──────────────┬───────────────┘
                │
-      In-memory Maps (dev)     │
-┌──────────────▼───────────────┐
-│        Data Storage          │
-│  pendingUsers (email→record) │
-│  users (email→record)        │
-│  (future: SQL/NoSQL DB)      │
-└──────────────┬───────────────┘
-               │
-               │ SMTP (TLS)
-               ▼
-┌──────────────────────────────┐
-│        Email Service         │
-│    (SMTP via Nodemailer)     │
-│  - Sends OTP verification    │
-│  - Logs OTP locally if OFF   │
-└──────────────────────────────┘
-
-Additional external service (currently called client-side):
-
-┌──────────────────────────────┐
-│       Claude API (AI)        │
-│   https://api.anthropic.com  │
-│  - Receives chat prompts     │
-│  - Returns experiment-help   │
-└──────────────────────────────┘
+       ┌───────┴────────┐
+       ▼                ▼
+┌─────────────┐  ┌──────────────────────────────┐
+│ users.json  │  │     Google Gemini API         │
+│  (disk)     │  │  gemini-1.5-flash             │
+│             │  │  - Receives chat prompts      │
+│ Persists    │  │  - Returns experiment help    │
+│ user accts  │  │  - Free tier, no credit card  │
+└─────────────┘  └──────────────────────────────┘
 ```
 
-### 2. Authentication Flow
+**Key architectural decision — AI calls are proxied through the server.**
+The browser never contacts the Gemini API directly. All AI requests go:
+`browser → /api/chat → server.js → Gemini API`
+This keeps the API key server-side only and avoids CORS errors.
 
-End-to-end flow: **register → OTP → verify → login → session**.
+---
 
-1. **Open Auth page**  
-   - User lands on `Auth.html`.  
-   - `Auth.js` checks `sessionStorage.stemlab_user`; if present, redirects to `Index.html`.
-2. **Registration form (Step 1)**  
-   - User clicks **Register** tab.  
-   - `Auth.js` validates:
-     - Full name (min 2 chars), valid email, school, grade (6–12), role (student/teacher).  
-     - Password is at least 8 characters and matches confirm password.
-3. **Create pending user**  
-   - On success, frontend sends `POST /api/auth/register` with `{ name, email, school, grade, role, password }`.  
-   - `server.js`:
-     - Normalises email and checks `users` Map for duplicates.  
-     - Hashes password using `bcrypt.hash(plain, 12)`.  
-     - Generates 6-digit OTP and expiry (`now + 15 min`).  
-     - Stores a record in `pendingUsers` Map keyed by email.  
-     - Sends OTP email via Nodemailer (or logs to console if SMTP is not configured).  
-   - Frontend stores `lastRegisteredEmail` and switches to OTP form (`formVerifyOtp`).
-4. **Email verification (Step 2)**  
-   - User enters 6-digit OTP.  
-   - Frontend calls `POST /api/auth/verify-otp` with `{ email, otp }`.  
-   - `server.js`:
-     - Looks up pending record in `pendingUsers`.  
-     - Checks expiry and code correctness.  
-     - On success, moves user to `users` Map (id + email + name + role + grade + hashed password).  
-     - Deletes pending record.  
-   - Frontend shows success message and automatically switches back to the login tab.
-5. **Login**  
-   - User submits login form, `Auth.js` validates email + non-empty password.  
-   - Sends `POST /api/auth/login` with `{ email, password }`.  
-   - `server.js`:
-     - Looks up user in `users` Map.  
-     - Compares `bcrypt.compare(plain, storedHash)`.  
-     - Returns `{ ok:true, user:{id,name,email,role,school,grade} }` on success.
-   - `Auth.js` stores the user object into `sessionStorage.stemlab_user` and navigates to `Index.html`.
-6. **Session usage in lab**  
-   - At the top of `Lab.js`, session is read from `sessionStorage`.  
-   - If no session exists, the script redirects back to `Auth.html`.  
-   - Session data (name, role, grade, school) is used for greetings and header UI.
+## 2. Authentication Flow
 
-### 3. Frontend Architecture
+End-to-end flow: **register → OTP → verify → login → session**
 
-- **HTML files**
-  - `Auth.html`: Authentication SPA, with tabbed **Login** and **Register** views and an OTP step integrated into the register tab.
-  - `Index.html`: Main lab UI containing:
-    - Header (logo, language toggle, user menu, chatbot toggle button).
-    - Lab area (experiment selector, stage, equipment, controls, observations).
-    - AI side panel (chat history, quick prompts, input bar).
-    - Report modal overlay.
+1. **Open Auth page** — `Auth.html` loads. `Auth.js` checks `sessionStorage.stemlab_user`; if present, redirects to `Index.html`.
+2. **Registration (Step 1)** — user fills name, email, school, grade, role, password. `Auth.js` validates all fields client-side, then POSTs to `/api/auth/register`.
+3. **Server creates pending user** — `server.js` normalises the email, checks for duplicates in `users.json`, hashes the password with `bcrypt` (cost 12), generates a 6-digit OTP, stores a record in the in-memory `pendingUsers` Map, and sends/logs the OTP.
+4. **Email verification (Step 2)** — user enters OTP. Frontend POSTs to `/api/auth/verify-otp`. On success, server moves the record from `pendingUsers` (RAM) to `users` (RAM + disk). `users.json` is written immediately.
+5. **Login** — user submits email + password. Server looks up `users`, runs `bcrypt.compare`, and returns the user object on success. Frontend writes to `sessionStorage.stemlab_user` and navigates to `Index.html`.
+6. **Session in lab** — `Lab.js` reads session from `sessionStorage` on every load. If missing, redirects to `Auth.html`.
 
-- **JavaScript**
-  - `Auth.js`: Pure JS, no framework. All interactions are DOM-based (query selectors, event listeners).  
-    - Manages tab switching and form validation.  
-    - Implements a two-step registration (form + OTP) with backend calls via `fetch`.  
-    - Updates ARIA attributes and error messages for accessibility.
-  - `Lab.js`: Main stateful controller for the lab SPA:
-    - Holds full lab state (temperature, concentration, experiment type, steps).  
-    - Controls DOM manipulation (heights of liquids, text of labels, flashing animations).  
-    - Orchestrates AI calls, TTS, voice input, and accessibility toggles.
-  - `i18n.js`:
-    - Defines a `translations` object for auth + shared text and a `T` object for lab-specific strings.  
-    - Provides `applyLanguage(lang)` and `handleLanguageToggle(lang)` for both auth and lab pages.
+---
 
-- **CSS**
-  - `Main.css`: Base reset, colors, typography, header, language toggle, modal, and shared components.  
-  - `Auth.css`: Card layout for the auth page, tabs, inputs, password strength meter.  
-  - `Lab.css`: Two-column grid layout, lab bench visuals, equipment, AI side panel, chat area, and responsive behaviour.
+## 3. User Persistence — `users.json`
 
-### 4. 3D Lab Engine (Design & Current Implementation)
+This is the key difference from the original in-memory-only implementation.
 
-The current version simulates the lab using **2D CSS/SVG-style elements**, but the architecture is designed so that the central **state + events** can later be wired into a 3D/physics engine.
+### Why it was changed
+The original code stored users in a plain JavaScript `Map` which lived only in RAM. Every server restart (including Cursor's automatic restarts during development) wiped all registered accounts, making login impossible.
 
-- **Current 2D setup**
-  - The beakers, thermometer, burner, and test tubes are styled via CSS in `Lab.css` inside containers like `.lab-stage`, `.beaker-glass`, `.thermo-body`.  
-  - Lab state (temperature, concentration, experiment, reactionDone) lives in the `state` object in `Lab.js`.  
-  - Functions such as `setTemperature`, `toggleBurner`, `startReaction`, and `testTubeClick` translate state changes directly into DOM style updates.
-
-- **Future 3D integration (conceptual)**
-  - Replace `.lab-stage` DOM visuals with a `<canvas>` or React Three Fiber scene.  
-  - Map `state.temperature`, `state.concentration`, and `state.experiment` to uniforms/props used by Three.js materials and animations.  
-  - Use a physics engine (e.g. Rapier.js) to simulate realistic liquid motion, collisions, and dragging of equipment:
-    - Drag & drop of test tubes → event updates a physics body transform.  
-    - Collisions between “beaker” and “liquid particle emitters” trigger interaction events and color changes.  
-  - Keep the AI + UI logic in `Lab.js` and mount a separate React/Three component for rendering scenes.
-
-### 5. AI Assistant Integration
-
-- **Prompt structure** (`Lab.js`, function `askClaude(userMsg)`):
-  - Uses `T[currentLang].aiSystemPrompt` as a **system-level prompt** that tells Claude:
-    - Student grade and context (Omani Grade 9).  
-    - Language (Arabic or English).  
-    - Style (short, encouraging, educational).  
-  - Adds **current experiment context**:
+### How it works
 
 ```js
-system: `${t.aiSystemPrompt}
-Current lab: experiment=${state.experiment}, temp=${state.temperature}°C, reaction=${state.reactionDone ? 'complete' : 'not started'}.`
+const USERS_FILE = path.join(__dirname, 'users.json');
+
+function loadUsers() {
+  // Called once at startup — reads users.json into a Map
+  const raw = fs.readFileSync(USERS_FILE, 'utf8');
+  return new Map(Object.entries(JSON.parse(raw)));
+}
+
+function saveUsers() {
+  // Called after every write operation (verify-otp, grade change)
+  fs.writeFileSync(USERS_FILE, JSON.stringify(Object.fromEntries(users), null, 2));
+}
 ```
 
-- Sends a `POST` request to Claude Messages API:
-  - `model`: `claude-sonnet-4-20250514`  
-  - `max_tokens`: `1000`  
-  - `messages`: `[{ role: 'user', content: userMsg }]`
+- `loadUsers()` is called **once at startup** — the Map is populated from disk.
+- `saveUsers()` is called **immediately after** any mutation: OTP verification (new account) and grade update.
+- `pendingUsers` (OTP sessions) remain **in-memory only** — they expire in 15 minutes anyway, so persisting them adds no value.
 
-- **Response handling**:
-  - Aggregates all text segments into a single string.  
-  - Appends to the chat as an AI message via `addMsg('ai', text)`.  
-  - Triggers `advanceStep()` in the step indicator.  
-  - If TTS is enabled, passes a text-only version to `speakText(...)`.
+### What's in `users.json`
 
-- **Arabic response and TTS**:
-  - When `currentLang === 'ar'`, prompts and explanations are in Arabic.  
-  - TTS sets `utter.lang = 'ar-SA'` to use an Arabic voice where available.  
-  - Chat messages are still plain HTML; TTS strips tags before speaking.
-
-### 6. Lab Report Generator
-
-- **Data collection**:
-  - Every significant action logs an observation via `addObservation(text)` in `Lab.js`.  
-  - Observations are stored in `state.observations` as objects: `{ time, text }`.  
-  - Timestamps are relative to `state.startTime`.
-
-- **Report generation** (`generateReport()`):
-  - Builds a human-readable block of bullet lines:
-
-```js
-const obsText = state.observations.length > 0
-  ? state.observations.map(o => `• [${o.time}] ${o.text}`).join('\n')
-  : t.repNoObs;
-```
-
-  - Injects into the report modal sections `repResults` and `repConclusion`.  
-  - Uses translation keys from `T[...]` for section titles and default conclusions.  
-  - Opens a modal overlay and optionally reads the report aloud via TTS.
-
-### 7. Teacher Observation Panel (Future)
-
-The current UI is student-focused, but the architecture anticipates a teacher observation panel.
-
-- **Planned behaviour**:
-  - Each student session emits real-time updates:
-    - Active experiment, parameter changes, reaction start/finish, notes taken.  
-  - Data would be sent to a teacher dashboard either via:
-    - **WebSockets** (preferred) for low-latency updates.  
-    - Or **short-polling** (XHR/fetch interval) in low-resource deployments.
-
-- **Visible data for teachers**:
-  - Connected students and their roles (student/teacher).  
-  - Current experiment and progress step (1–5).  
-  - Latest AI questions and responses.  
-  - Generated lab report summaries.
-
-### 8. Translation System
-
-- **`i18n.js`**
-  - `translations`: For auth and shared text (logo, language labels, OTP copy, page titles).  
-  - `T`: Full lab translation object used by `Lab.js` for all in-lab strings.
-
-- **Public functions**:
-  - `applyLanguage(lang)`:
-    - Sets `document.documentElement.lang` and `dir`.  
-    - Updates all `[data-i18n]` elements with text or HTML.  
-    - Updates the document `<title>` based on `pageTitleAuth` or `pageTitleLab`.  
-  - `handleLanguageToggle(lang)`:
-    - Saves `stemlab_lang` to `localStorage`.  
-    - Calls `applyLanguage(lang)` and then `window.setLang(lang)` if available (lab page).
-
-- **DOM attributes**:
-  - All translatable labels in auth + main title use `data-i18n="key"`.  
-  - Language toggle buttons wrap their text in `<span data-i18n="langArLabel">` etc.  
-  - Lab-specific strings are managed by `T` via `applyLang()` in `Lab.js`, not via `data-i18n` to avoid performance overhead on every change.
-
-- **RTL/LTR handling**:
-  - `document.documentElement.dir` is set to `rtl` for Arabic and `ltr` for English.  
-  - CSS contains `[dir="rtl"]` and `[dir="ltr"]` rules for aligning certain UI elements (e.g. stage labels, borders).
-
-### 9. Database Schema (Logical)
-
-Current implementation uses in-memory Maps, but they mirror what would later be proper DB tables.
-
-- **`pending_users`** (represented by `pendingUsers` Map)
-  - `email` (string, PK): Student/teacher email.  
-  - `name` (string): Full name.  
-  - `school` (string): School name.  
-  - `grade` (string/int): Grade 6–12.  
-  - `role` (string): `"student"` or `"teacher"`.  
-  - `password_hash` (string): Bcrypt hash of user password.  
-  - `otp` (string): 6-digit OTP string.  
-  - `otp_expires_at` (timestamp): Expiration time.  
-  - `created_at` (timestamp): Creation time.
-
-- **`users`** (represented by `users` Map)
-  - `id` (string, PK): Unique identifier for user.  
-  - `email` (string, unique): Login email.  
-  - `name` (string): Full name.  
-  - `school` (string): School name.  
-  - `grade` (string/int): Grade 6–12.  
-  - `role` (string): `"student"` or `"teacher"`.  
-  - `password_hash` (string): Bcrypt hash.  
-  - `created_at` (timestamp): When user was activated.
-
-### 10. Key Code Snippets
-
-- **Register → OTP backend (simplified)** (`server.js`):
-
-```js
-app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password, school, grade, role } = req.body || {};
-  const normEmail = normaliseEmail(email);
-  if (users.has(normEmail)) return res.status(409).json({ ok:false, error:'EMAIL_EXISTS' });
-
-  const passwordHash = await bcrypt.hash(String(password), 12);
-  const otp = generateOtp();
-  const otpExpiresAt = Date.now() + 15 * 60 * 1000;
-
-  pendingUsers.set(normEmail, { name, email:normEmail, school, grade, role,
-                                passwordHash, otp, otpExpiresAt, createdAt:new Date().toISOString() });
-  await sendOtpEmail(normEmail, otp);
-  res.json({ ok:true, message:'PENDING_CREATED' });
-});
-```
-
-- **OTP verification and promotion to user** (`server.js`):
-
-```js
-app.post('/api/auth/verify-otp', async (req, res) => {
-  const { email, otp } = req.body || {};
-  const normEmail = normaliseEmail(email);
-  const record = pendingUsers.get(normEmail);
-  if (!record) return res.status(404).json({ ok:false, error:'NOT_FOUND' });
-  if (record.otpExpiresAt < Date.now()) {
-    pendingUsers.delete(normEmail);
-    return res.status(400).json({ ok:false, error:'OTP_EXPIRED' });
+```json
+{
+  "student@school.om": {
+    "id": "1718000000000-abc123",
+    "name": "Mohammed Al-Harthi",
+    "email": "student@school.om",
+    "school": "Al Nmoothajia School",
+    "grade": "9",
+    "role": "student",
+    "passwordHash": "$2b$12$...",
+    "createdAt": "2024-06-10T08:00:00.000Z"
   }
-  if (String(record.otp) !== String(otp)) {
-    return res.status(400).json({ ok:false, error:'OTP_INVALID' });
-  }
-  const user = { id: `${Date.now()}-${Math.random().toString(16).slice(2)}`, ...record };
-  users.set(normEmail, user);
-  pendingUsers.delete(normEmail);
-  res.json({ ok:true, message:'VERIFIED', user:{ id:user.id, name:user.name, email:user.email,
-        school:user.school, grade:user.grade, role:user.role } });
-});
+}
 ```
 
-- **Client-side register step 1** (`Auth.js`):
+> `users.json` is gitignored. It must never be committed to version control as it contains password hashes.
+
+---
+
+## 4. AI Assistant — Google Gemini Integration
+
+### Why Gemini instead of Claude
+
+The original design called for the Anthropic Claude API. Gemini's `gemini-1.5-flash` model was substituted because it has a **free tier with no credit card required**, making it accessible for student/educational projects.
+
+### Proxy architecture (`server.js`)
 
 ```js
-if (formRegister) {
-  formRegister.addEventListener("submit", async (e) => {
-    e.preventDefault(); clearErrors();
-    // ... validate fields ...
-    const res = await fetch("/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, school, grade, role, password }),
-    });
-    const data = await res.json();
-    if (res.ok && data.ok) {
-      lastRegisteredEmail = email;
-      formRegister.hidden  = true;
-      formVerifyOtp.hidden = false;
-      startOtpCooldown(60);
+app.post('/api/chat', async (req, res) => {
+  const { system, messages, max_tokens } = req.body;
+  const userMsg = messages[messages.length - 1].content;
+  const prompt = system ? `${system}\n\n${userMsg}` : userMsg;
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: max_tokens || 1000 }
+      })
     }
-  });
-}
+  );
+
+  const data = await response.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+  // Response is reshaped to match the original Anthropic format
+  // so Lab.js requires zero changes
+  return res.json({ content: [{ type: 'text', text }] });
+});
 ```
 
-- **Language toggle that keeps everything in sync** (`i18n.js`):
+### Response shape compatibility
+
+Gemini's response format differs from Anthropic's. The server normalises the response before sending it to the browser:
+
+| | Gemini (raw) | Returned by `/api/chat` |
+|---|---|---|
+| Format | `candidates[0].content.parts[0].text` | `content[0].text` |
+| Shape | Gemini-specific | Anthropic-compatible |
+
+`Lab.js` reads `data.content?.map(b => b.text).join('')` — this works unchanged because the server does the translation.
+
+### Prompt construction (`Lab.js`)
 
 ```js
-function handleLanguageToggle(lang) {
-  setPreferredLanguage(lang);
-  applyLanguage(lang);      // Updates HTML dir/lang, titles, auth labels
-  if (typeof window.setLang === 'function') {
-    window.setLang(lang);   // Notifies Lab.js to update lab-specific UI
-  }
-}
+body: JSON.stringify({
+  system: `${t.aiSystemPrompt}
+Current lab: experiment=${state.experiment}, temp=${state.temperature}°C, reaction=${state.reactionDone ? 'complete' : 'not started'}.`,
+  messages: [{ role: 'user', content: userMsg }]
+})
 ```
 
-### 11. How Everything Connects (User Story)
+The system prompt includes the student's current lab state so the AI can give contextually relevant answers.
 
-1. **Student opens the site** at `http://localhost:3000/`. The server serves `Auth.html`.  
-2. **Student chooses language** via the header toggle; `handleLanguageToggle` updates `lang`, `dir`, visible labels, and stores the choice.  
-3. **Student registers** with name/email/password/school/grade/role. `Auth.js` validates and calls `/api/auth/register`.  
-4. **Server** creates a pending user, hashes the password, generates OTP, and sends/logs the OTP.  
-5. **Student enters OTP** on the verification screen; `Auth.js` calls `/api/auth/verify-otp`. On success, the user is moved to the `users` store.  
-6. **Student logs in**, and the server validates credentials. On success, the frontend writes `sessionStorage.stemlab_user` and redirects to `Index.html`.  
-7. **Index page loads**. `Lab.js` checks session; if missing, it redirects back. Otherwise, it:  
-   - Reads `stemlab_lang` and applies translations via `applyLang`.  
-   - Builds lab visuals (beakers, burner, thermometer) and greeting.  
-8. **Student runs an experiment** by pressing "Start Reaction":  
-   - DOM animations update beaker liquid heights and colors.  
-   - Observations are appended with formatted timestamps.  
-   - AI assistant posts a guiding explanation for the reaction.  
-9. **Student chats with AI**: Each question triggers `askClaude`, sending lab context + question to Claude, and new messages appear in the chat.  
-10. **Student generates a lab report**: `generateReport()` composes an observation list and conclusion, fills the modal, and optionally reads it aloud.  
-11. **Student logs out** using the header menu, which clears `sessionStorage` and returns them to `Auth.html`.
+---
 
-### 12. Deployment Notes
+## 5. Translation System (`i18n.js`)
 
-- **Omantel Cloud / VM-style deployment**
-  - Provision a Linux VM with Node.js (v18+) installed.  
-  - Place project files in `/var/www/stemlab` (for example).  
-  - Set environment variables via `.env` or systemd unit.  
-  - Run with a process manager like `pm2`:
+### What changed and why
+
+The original `i18n.js` had a **critical structural bug**: the `window.translations` object defined the `en` key twice:
+
+```js
+window.translations = {
+  en: { /* auth keys */ },   // ← first definition
+  ar: { /* ... */ },
+  en: { /* lab keys */ },    // ← second definition — OVERWRITES the first
+};
+```
+
+JavaScript silently discards the first key when duplicates exist, so `window.translations.en` only contained lab keys and none of the auth keys (`loginTab`, `authLogo`, `loginButton`, etc.). Switching to EN did nothing visible.
+
+Additionally, a separate `const T = { ar: {...}, en: {...} }` block existed below the main object — a leftover from an earlier version — with its own duplicate set of keys.
+
+### The fix
+
+Both issues were resolved by **merging everything into a single, unified `window.translations` object** with one `en` block and one `ar` block, each containing all keys for both the auth page and the lab page.
+
+A safe alias `window.T = window.translations` was added at the end so that any `|| T` fallback references in `Lab.js` continue to resolve correctly without requiring changes to that file.
+
+### Structure
+
+```js
+window.translations = {
+  en: {
+    // HTML attributes
+    dir: 'ltr', lang: 'en',
+    // Page titles
+    pageTitleAuth: '...', pageTitleLab: '...',
+    // Auth page keys
+    loginTab: 'Login', registerTab: 'Register', ...
+    // Lab page keys
+    experiments: [...], btnReact: '...', quickPrompts: [...], ...
+    // AI system prompt
+    aiSystemPrompt: `...`,
+  },
+  ar: {
+    // Mirror structure in Arabic + dir: 'rtl'
+  }
+};
+
+window.T = window.translations; // safe alias for Lab.js fallbacks
+```
+
+### `applyLanguage(lang)` flow
+
+1. Reads `window.translations[lang]`
+2. Sets `document.documentElement.lang` and `dir`
+3. Updates all `[data-i18n]` elements with `textContent` or `innerHTML`
+4. Updates `[data-i18n-placeholder]` placeholders
+5. Updates `document.title`
+6. Calls `window.applyLang(lang, false)` if Lab.js is loaded (lab page only)
+
+---
+
+## 6. Header UI Changes (`Index.html`)
+
+### Profile dropdown removed
+
+The original header had a floating `.profile-dropdown` div attached to the user avatar that contained "Change Grade" and "Logout" buttons. This was removed because:
+- The Logout button duplicated the existing navbar logout button
+- The floating card had positioning issues
+
+### Grade badge is now interactive
+
+The `#badgeGrade` element was changed from a plain `<div>` to a `<button>` that directly calls `openChangeGradeModal()`:
+
+```html
+<button class="badge badge-green" id="badgeGrade"
+        onclick="openChangeGradeModal()"
+        title="Click to change grade"
+        style="cursor:pointer;border:none;...">Grade —</button>
+```
+
+Clicking the green grade badge in the header now opens the change grade modal directly. The `toggleProfileDropdown()` function in `Lab.js` was removed as it is no longer needed.
+
+---
+
+## 7. Database Schema (Logical)
+
+### `pending_users` (in-memory Map only)
+
+| Field | Type | Description |
+|---|---|---|
+| `email` | string (PK) | Normalised lowercase email |
+| `name` | string | Full name |
+| `school` | string | School name |
+| `grade` | string | Grade 6–12 |
+| `role` | string | `"student"` or `"teacher"` |
+| `passwordHash` | string | bcrypt hash (cost 12) |
+| `otp` | string | 6-digit OTP |
+| `otpExpiresAt` | timestamp | `Date.now() + 15 min` |
+| `createdAt` | ISO string | Creation time |
+
+### `users` (in-memory Map + `users.json`)
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | string (PK) | `timestamp-randomhex` |
+| `email` | string (unique) | Normalised lowercase email |
+| `name` | string | Full name |
+| `school` | string | School name |
+| `grade` | string | Grade 6–12 |
+| `role` | string | `"student"` or `"teacher"` |
+| `passwordHash` | string | bcrypt hash |
+| `createdAt` | ISO string | Activation time |
+
+---
+
+## 8. Deployment Notes
+
+### Development
+- Users stored in `users.json` next to `server.js` — persists across restarts.
+- OTP codes logged to console if SMTP is not configured.
+- AI calls proxied through `/api/chat` using `GEMINI_API_KEY` from `.env`.
+- Recommended browser: Chrome (best Web Speech API support). Firefox works for all non-voice features.
+
+### Production (Omantel Cloud / Linux VM)
 
 ```bash
 cd /var/www/stemlab
@@ -373,20 +303,43 @@ pm2 start server.js --name stemlab
 pm2 save
 ```
 
-  - Put Nginx in front as a reverse proxy terminating TLS, forwarding `https://stemlab.your-domain.om` to `http://localhost:3000`.
+Put Nginx in front as a reverse proxy terminating TLS:
+```nginx
+location / {
+  proxy_pass http://localhost:3000;
+}
+```
 
-- **Vercel / serverless-style deployment**
-  - Convert `server.js` endpoints to Vercel Serverless Functions or another FaaS runtime.  
-  - Serve the static `Auth.html`, `Index.html`, CSS, and JS via a static hosting configuration.  
-  - Move AI + email configuration into environment variables provided via Vercel’s dashboard.
+For production, also:
+- Replace `users.json` with PostgreSQL or MySQL
+- Add JWT-based auth middleware
+- Set a Gemini API quota/budget in Google AI Studio
+- Enforce HTTPS, rate limiting on auth routes, and CSRF protection
 
-- **Development vs Production differences**
-  - **Dev**:
-    - In-memory Maps for users (no persistence).  
-    - OTP codes may be logged to console if SMTP is not configured.  
-    - Claude or AI calls may be disabled or stubbed if keys are not available.
-  - **Prod**:
-    - Use a real database (PostgreSQL/MySQL) instead of Maps.  
-    - Route AI calls through a secure backend endpoint with rate limiting.  
-    - Enforce HTTPS, strong password policies, and CSRF protection if you add mutating routes beyond auth.
+### Vercel / serverless
+- Convert `server.js` endpoints to Vercel Serverless Functions
+- Serve static files via Vercel's static hosting
+- Set `GEMINI_API_KEY` in Vercel's environment variable dashboard
 
+---
+
+## 9. `.gitignore`
+
+The following must always be gitignored:
+
+```
+node_modules/
+.env
+users.json
+```
+
+- `.env` contains the Gemini API key
+- `users.json` contains password hashes
+- `node_modules/` is large and reproducible via `npm install`
+
+Create with:
+```bash
+echo "node_modules/" > .gitignore
+echo ".env" >> .gitignore
+echo "users.json" >> .gitignore
+```

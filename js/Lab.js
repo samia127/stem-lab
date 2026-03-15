@@ -40,8 +40,7 @@ const state = {
   startTime:    Date.now()
 };
 
-const CLAUDE_API = 'https://api.anthropic.com/v1/messages';
-
+const CLAUDE_API = '/api/chat';
 /* ══════════════════════════════════════════
    3. INIT
 ══════════════════════════════════════════ */
@@ -742,24 +741,6 @@ function updateToggleChatBtn() {
   if (fab) fab.classList.toggle('visible', !chatVisible);
 }
 
-// ── PROFILE DROPDOWN & GRADE CHANGE ─────────────────────────────
-function toggleProfileDropdown() {
-  const dropdown = document.getElementById('profileDropdown');
-  if (!dropdown) return;
-  dropdown.hidden = !dropdown.hidden;
-  
-  // Close dropdown when clicking outside
-  if (!dropdown.hidden) {
-    setTimeout(() => {
-      document.addEventListener('click', function closeOnOutsideClick(e) {
-        if (!dropdown.contains(e.target) && e.target.id !== 'userAvatar') {
-          dropdown.hidden = true;
-          document.removeEventListener('click', closeOnOutsideClick);
-        }
-      });
-    }, 0);
-  }
-}
 
 function openChangeGradeModal() {
   const modal = document.getElementById('changeGradeModal');
@@ -794,9 +775,6 @@ function openChangeGradeModal() {
   modal.classList.add('open');
   gradeSelect.focus();
   
-  // Close profile dropdown
-  const dropdown = document.getElementById('profileDropdown');
-  if (dropdown) dropdown.hidden = true;
 }
 
 function closeChangeGradeModal() {

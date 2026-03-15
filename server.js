@@ -281,6 +281,39 @@ app.get('/', (_req, res) => {
   res.sendFile(path.join(__dirname, 'Auth.html'));
 });
 
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { system, messages, max_tokens } = req.body || {};
+    if (!messages) return res.status(400).json({ ok: false, error: 'MISSING_FIELDS' });
+
+    // Combine system prompt + user message for Gemini
+    const userMsg = messages[messages.length - 1].content;
+    const prompt = system ? `${system}\n\n${userMsg}` : userMsg;
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: max_tokens || 1000 }
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    // Reformat Gemini response to match Anthropic's shape so Lab.js needs no changes
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    return res.json({ content: [{ type: 'text', text }] });
+
+  } catch (err) {
+    console.error('chat error', err);
+    return res.status(500).json({ ok: false, error: 'SERVER_ERROR' });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`STEM Lab auth server running at http://localhost:${PORT}`);
 });
